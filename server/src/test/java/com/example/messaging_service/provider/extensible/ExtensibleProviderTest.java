@@ -236,7 +236,8 @@ class ExtensibleProviderTest {
 			.hasMessageContaining("variables.uaap.custom: names starting with 'uaap.' are reserved for message values")
 			.hasMessageContaining("request.url may only use variables, not {{uaap.message.to}}")
 			.hasMessageContaining("unknown uaap parameter {{uaap.message.nope}} in request.body.fields.a; use one of "
-					+ "[uaap.message.template, uaap.message.text, uaap.message.to, uaap.message.to_digits]")
+					+ "[uaap.message.template, uaap.message.text, uaap.message.to, uaap.message.to_digits, "
+					+ "uaap.text, uaap.to, uaap.to_digits]")
 			.hasMessageContaining("placeholder {{api.key}} in request.body.fields.b may only use letters, digits, '_' and '-'");
 	}
 

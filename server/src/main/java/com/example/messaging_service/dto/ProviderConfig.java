@@ -3,7 +3,6 @@ package com.example.messaging_service.dto;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.example.messaging_service.provider.extensible.ExtensibleProviderDefinition.Description;
@@ -24,37 +23,30 @@ import tools.jackson.databind.annotation.JsonNaming;
  * @param channel the channel this provider sends on, e.g. SMS
  * @param enabled true when the provider may send; missing means false
  * @param variables raw values (secrets and settings) usable as {{name}} in templates
+ * @param systemVariables documents the uaap.* placeholders this provider uses, e.g. {"uaap.to": "",
+ * "uaap.text": ""}. Always filled from the message at send time: values entered here are ignored.
  */
 @JsonNaming(KebabCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ProviderConfig(String id, String displayName, MessageType channel, Boolean enabled,
-		Map<String, String> variables, Request request, Response response) {
+		Map<String, String> variables, Map<String, String> systemVariables, Request request, Response response) {
 
 	public ProviderConfig {
 		// Boolean, not boolean: Jackson 3 rejects a missing primitive, and a missing value means false.
 		enabled = Boolean.TRUE.equals(enabled);
 		variables = (variables == null) ? Map.of() : Collections.unmodifiableMap(new LinkedHashMap<>(variables));
+		systemVariables = (systemVariables == null) ? Map.of()
+				: Collections.unmodifiableMap(new LinkedHashMap<>(systemVariables));
 	}
 
-	/**
-	 * Reads JSON. Older bodies and db.json files have {@code "channels": ["SMS"]}; one entry is read
-	 * as that channel, so they keep working and are written back with {@code channel}.
-	 */
 	@JsonCreator
 	public static ProviderConfig fromJson(@JsonProperty("id") String id,
 			@JsonProperty("display-name") String displayName, @JsonProperty("channel") String channel,
-			@JsonProperty("channels") List<String> channels, @JsonProperty("enabled") Boolean enabled,
-			@JsonProperty("variables") Map<String, String> variables, @JsonProperty("request") Request request,
-			@JsonProperty("response") Response response) {
-		String chosen = channel;
-		if (chosen == null && channels != null) {
-			if (channels.size() > 1) {
-				throw new IllegalArgumentException(
-						"channel takes one value, for example \"SMS\"; register the provider once per channel");
-			}
-			chosen = channels.isEmpty() ? null : channels.get(0);
-		}
-		return new ProviderConfig(id, displayName, parseChannel(chosen), enabled, variables, request, response);
+			@JsonProperty("enabled") Boolean enabled, @JsonProperty("variables") Map<String, String> variables,
+			@JsonProperty("system-variables") Map<String, String> systemVariables,
+			@JsonProperty("request") Request request, @JsonProperty("response") Response response) {
+		return new ProviderConfig(id, displayName, parseChannel(channel), enabled, variables, systemVariables, request,
+				response);
 	}
 
 	private static MessageType parseChannel(String value) {
@@ -71,11 +63,11 @@ public record ProviderConfig(String id, String displayName, MessageType channel,
 	}
 
 	public ProviderConfig withId(String newId) {
-		return new ProviderConfig(newId, displayName, channel, enabled, variables, request, response);
+		return new ProviderConfig(newId, displayName, channel, enabled, variables, systemVariables, request, response);
 	}
 
 	public ProviderConfig withVariables(Map<String, String> newVariables) {
-		return new ProviderConfig(id, displayName, channel, enabled, newVariables, request, response);
+		return new ProviderConfig(id, displayName, channel, enabled, newVariables, systemVariables, request, response);
 	}
 
 }

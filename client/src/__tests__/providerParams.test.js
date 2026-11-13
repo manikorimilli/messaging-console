@@ -179,7 +179,7 @@ describe('uaap parameters', () => {
       },
     });
     expect(problems).toEqual([
-      '{uaap.message.nope} is not a known uaap parameter. Use one of: uaap.message.to, uaap.message.to_digits, uaap.message.text, uaap.message.template',
+      '{uaap.message.nope} is not a known uaap parameter. Use one of: uaap.message.to, uaap.message.to_digits, uaap.message.text, uaap.message.template, uaap.to, uaap.to_digits, uaap.text',
       '{api.key} may contain only letters, digits, "_" and "-"',
       'request.url cannot use {uaap.message.to}. Message values are not allowed in the URL.',
       'variables.text clashes with the built-in {{text}}. Rename it.',

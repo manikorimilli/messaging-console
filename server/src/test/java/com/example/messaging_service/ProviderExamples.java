@@ -32,7 +32,7 @@ public final class ProviderExamples {
 	}
 
 	public static ProviderConfig plivo(boolean enabled, Map<String, String> variables) {
-		return new ProviderConfig("PLIVO", "Plivo", MessageType.SMS, enabled, variables,
+		return new ProviderConfig("PLIVO", "Plivo", MessageType.SMS, enabled, variables, null,
 				new Request("POST", "https://api.plivo.com/v1/Account/{{auth-id}}/Message/",
 						new Auth(AuthType.BASIC, "{{auth-id}}", "{{auth-token}}", null, null, null),
 						new Body(BodyFormat.JSON, Map.of("src", "{{from}}", "dst", "{{to_digits}}", "text", "{{text}}"),

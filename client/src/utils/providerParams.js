@@ -14,6 +14,9 @@ export const UAAP_PARAMETERS = {
   'uaap.message.to_digits': 'to_digits',
   'uaap.message.text': 'text',
   'uaap.message.template': 'text',
+  'uaap.to': 'to',
+  'uaap.to_digits': 'to_digits',
+  'uaap.text': 'text',
 };
 
 // The uaap name shown for each built-in, for providers saved in backend form.

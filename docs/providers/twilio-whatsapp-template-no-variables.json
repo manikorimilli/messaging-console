@@ -6,8 +6,12 @@
   "variables": {
     "account-sid": "",
     "auth-token": "",
-    "from": "+14155238886",
-    "content-sid": "HXa9d0fd6215858003e64aae6f151ea1e7"
+    "from": "",
+    "content-sid": ""
+  },
+  "system-variables": {
+    "uaap.to": "",
+    "uaap.text": ""
   },
   "request": {
     "method": "POST",
@@ -20,7 +24,7 @@
     "body": {
       "format": "form",
       "fields": {
-        "To": "whatsapp:{{to}}",
+        "To": "whatsapp:{{uaap.to}}",
         "From": "whatsapp:{{from}}",
         "ContentSid": "{{content-sid}}"
       }

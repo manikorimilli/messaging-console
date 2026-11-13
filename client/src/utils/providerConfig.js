@@ -32,14 +32,19 @@ export function usesContentTemplate(provider) {
   return Object.keys(fields).some((name) => name.toLowerCase() === 'contentvariables');
 }
 
+// Every placeholder spelling that is filled from the typed message.
+const TEXT_PLACEHOLDERS = ['{{text}}', '{{uaap.text}}', '{{uaap.message.text}}', '{{uaap.message.template}}'];
+
 // Whether this provider's request actually sends the typed message anywhere.
 // A Content Template with no variables (e.g. Twilio's "Delivery Updates") has
-// no {{text}} in its fields at all: ContentSid alone is enough, so the
+// no text placeholder in its fields at all: ContentSid alone is enough, so the
 // message box is not required.
 export function needsMessageBody(provider) {
   const fields = provider?.request?.body?.fields;
   if (!fields || typeof fields !== 'object') return true;
-  return Object.values(fields).some((v) => typeof v === 'string' && v.includes('{{text}}'));
+  return Object.values(fields).some(
+    (v) => typeof v === 'string' && TEXT_PLACEHOLDERS.some((placeholder) => v.includes(placeholder)),
+  );
 }
 
 export const PROVIDER_EXAMPLE = {

@@ -27,7 +27,10 @@ final class TemplateFiller {
 			"uaap.message.to", "to",
 			"uaap.message.to_digits", "to_digits",
 			"uaap.message.text", "text",
-			"uaap.message.template", "text");
+			"uaap.message.template", "text",
+			"uaap.to", "to",
+			"uaap.to_digits", "to_digits",
+			"uaap.text", "text");
 
 	/** {@code {{name}}} (spaces allowed inside) or {@code {name}}, but not {@code ${name}}. */
 	private static final Pattern PLACEHOLDER = Pattern

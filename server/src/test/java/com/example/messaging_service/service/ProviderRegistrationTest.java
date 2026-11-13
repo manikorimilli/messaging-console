@@ -125,7 +125,7 @@ class ProviderRegistrationTest {
 		void uaapAndSingleBracePlaceholdersAreSavedAndFilled() {
 			ProviderConfig example = ProviderExamples.plivo();
 			ProviderConfig uaap = new ProviderConfig(example.id(), example.displayName(), example.channel(),
-					example.enabled(), example.variables(),
+					example.enabled(), example.variables(), null,
 					new Request("POST", "https://api.plivo.com/v1/Account/{auth-id}/Message/",
 							new Auth(AuthType.BASIC, "{auth-id}", "{auth-token}", null, null, null),
 							new Body(BodyFormat.JSON,
@@ -184,7 +184,7 @@ class ProviderRegistrationTest {
 		@Test
 		void brokenBlockListsEveryProblemAndSavesNothing() {
 			ProviderConfig broken = new ProviderConfig("PLIVO", null, MessageType.SMS, true,
-					Map.of("token", "t"), null, null);
+					Map.of("token", "t"), null, null, null);
 
 			assertProblems(() -> registry.register(broken), "request is missing", "response is missing");
 			assertThat(store.load()).isEmpty();
@@ -311,7 +311,7 @@ class ProviderRegistrationTest {
 
 		@Test
 		void failsOnABrokenStoredProvider() {
-			store.save(List.of(new ProviderConfig("PLIVO", null, MessageType.SMS, false, Map.of(), null,
+			store.save(List.of(new ProviderConfig("PLIVO", null, MessageType.SMS, false, Map.of(), null, null,
 					null)));
 
 			assertThatThrownBy(ProviderRegistrationTest.this::restart).isInstanceOf(IllegalStateException.class)

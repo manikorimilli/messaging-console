@@ -18,5 +18,5 @@ import tools.jackson.databind.annotation.JsonNaming;
 @JsonNaming(KebabCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ProviderResponse(String id, String displayName, MessageType channel, boolean enabled,
-		Map<String, String> variables, Request request, Response response) {
+		Map<String, String> variables, Map<String, String> systemVariables, Request request, Response response) {
 }

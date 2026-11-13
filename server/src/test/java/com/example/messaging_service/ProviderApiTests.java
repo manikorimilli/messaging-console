@@ -89,18 +89,6 @@ class ProviderApiTests {
 			.andExpect(jsonPath("$.channels").doesNotExist());
 		mvc.perform(delete("/api/v1/providers/PLIVO")).andExpect(status().isNoContent());
 
-		// Older bodies with a one-entry "channels" list still work.
-		mvc.perform(post("/api/v1/providers").contentType(MediaType.APPLICATION_JSON)
-			.content(ProviderExamples.PLIVO_JSON.replace("\"channel\": \"SMS\"", "\"channels\": [\"SMS\"]")))
-			.andExpect(status().isCreated())
-			.andExpect(jsonPath("$.channel").value("SMS"));
-		mvc.perform(delete("/api/v1/providers/PLIVO")).andExpect(status().isNoContent());
-
-		mvc.perform(post("/api/v1/providers").contentType(MediaType.APPLICATION_JSON)
-			.content(ProviderExamples.PLIVO_JSON.replace("\"channel\": \"SMS\"", "\"channels\": [\"SMS\", \"SMS2\"]")))
-			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.detail")
-				.value("channel takes one value, for example \"SMS\"; register the provider once per channel"));
 		// WHATSAPP is a second supported channel, registered the same way as SMS.
 		mvc.perform(post("/api/v1/providers").contentType(MediaType.APPLICATION_JSON)
 			.content(ProviderExamples.PLIVO_JSON.replace("\"channel\": \"SMS\"", "\"channel\": \"WHATSAPP\"")))
@@ -121,7 +109,7 @@ class ProviderApiTests {
 	@Test
 	void invalidBlockGives400WithEveryProblem() throws Exception {
 		mvc.perform(post("/api/v1/providers").contentType(MediaType.APPLICATION_JSON)
-			.content("{ \"id\": \"broken\", \"channels\": [\"SMS\"] }"))
+			.content("{ \"id\": \"broken\", \"channel\": \"SMS\" }"))
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
 			.andExpect(jsonPath("$.problems").value(hasItem("request is missing")))

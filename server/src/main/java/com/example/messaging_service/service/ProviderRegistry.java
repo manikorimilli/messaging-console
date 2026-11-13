@@ -213,7 +213,7 @@ public class ProviderRegistry {
 		Map<String, String> variables = new LinkedHashMap<>();
 		config.variables().forEach((name, value) -> variables.put(name, StringUtils.hasText(value) ? MASK : ""));
 		return new ProviderResponse(config.id(), config.displayName(), config.channel(), config.enabled(), variables,
-				config.request(), config.response());
+				config.systemVariables(), config.request(), config.response());
 	}
 
 	private Stored requireStored(String id) {
