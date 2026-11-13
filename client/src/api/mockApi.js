@@ -8,7 +8,7 @@
 //   others  accepted
 import { ApiError } from './ApiError.js';
 import { MOCK_PROVIDERS } from './mockData.js';
-import { MASKED_VALUE } from '../utils/providerConfig.js';
+import { CHANNELS, MASKED_VALUE } from '../utils/providerConfig.js';
 import { BODY_MAX_LENGTH, E164_PATTERN, validateProviderConfig } from '../utils/validation.js';
 
 const SECRET_NAME = /secret|token|password|key/i;
@@ -122,9 +122,9 @@ export async function deleteProvider(id) {
 }
 
 function checkMessage(payload) {
-  if (payload.type !== 'SMS') {
+  if (!CHANNELS.includes(payload.type)) {
     throw problem(400, 'UNSUPPORTED_MESSAGE_TYPE', 'Unsupported message type',
-      `Message type '${payload.type}' is not supported. Only SMS is available.`);
+      `Message type '${payload.type}' is not supported. Use one of: ${CHANNELS.join(', ')}.`);
   }
   const problems = [];
   if (typeof payload.body !== 'string' || payload.body.trim().length === 0) problems.push('body must not be blank');
@@ -132,14 +132,14 @@ function checkMessage(payload) {
   return problems;
 }
 
-function resolveProvider(providerId) {
+function resolveProvider(providerId, type) {
   const stored = providerId ? store.get(String(providerId).trim().toUpperCase()) : undefined;
   if (!stored) {
     const known = store.size ? `Registered providers: ${[...store.keys()].sort().join(', ')}.` : 'No providers are registered.';
     throw problem(400, 'UNSUPPORTED_PROVIDER', 'Unsupported provider', `Provider '${providerId}' is not registered. ${known}`);
   }
-  if (stored.channel !== 'SMS') {
-    throw problem(400, 'UNSUPPORTED_MESSAGE_TYPE', 'Unsupported message type', `Provider '${stored.id}' does not support SMS.`);
+  if (stored.channel !== type) {
+    throw problem(400, 'UNSUPPORTED_MESSAGE_TYPE', 'Unsupported message type', `Provider '${stored.id}' does not support ${type}.`);
   }
   if (!stored.enabled) {
     throw problem(503, 'PROVIDER_UNAVAILABLE', 'Provider unavailable', `Provider '${stored.id}' is disabled.`);
@@ -166,7 +166,7 @@ export async function sendSms(payload) {
   if (typeof payload.to !== 'string' || !E164_PATTERN.test(payload.to)) problems.push('to must be a valid E.164 phone number');
   if (problems.length) throw validationFailed('The message request is invalid.', problems);
 
-  const provider = resolveProvider(payload.provider);
+  const provider = resolveProvider(payload.provider, payload.type);
   const result = simulateProvider(provider.id, payload.to);
   if (result.code === 'PROVIDER_REJECTED') {
     throw problem(502, result.code, 'Provider rejected the message', result.detail, { providerErrorCode: result.providerErrorCode });

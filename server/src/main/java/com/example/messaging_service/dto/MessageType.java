@@ -6,11 +6,11 @@ import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 /**
- * The channel a message is sent on. New channels (WHATSAPP, EMAIL) are added here later.
+ * The channel a message is sent on. New channels (EMAIL, ...) are added here later.
  */
 public enum MessageType {
 
-	SMS;
+	SMS, WHATSAPP;
 
 	/**
 	 * Accepts any letter case ("sms", "Sms") from JSON. An unknown value throws, which the

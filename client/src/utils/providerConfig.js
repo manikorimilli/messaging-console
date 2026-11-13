@@ -2,6 +2,9 @@ export const MASKED_VALUE = '****';
 export const AUTH_TYPES = ['basic', 'bearer', 'header', 'none'];
 export const BODY_FORMATS = ['form', 'json'];
 
+// Channels the backend can send on. Keep in sync with the server's MessageType enum.
+export const CHANNELS = ['SMS', 'WHATSAPP'];
+
 // A provider sends on one channel ("channel": "SMS"). Older responses used a
 // "channels" list; its first entry is read as the channel.
 export function providerChannel(provider) {
@@ -9,7 +12,9 @@ export function providerChannel(provider) {
   return typeof value === 'string' ? value.toUpperCase() : undefined;
 }
 
-export const supportsSms = (provider) => providerChannel(provider) === 'SMS';
+// Whether a message can be sent through this provider: it is on a channel the
+// backend supports. Replaces the old SMS-only "supportsSms" check.
+export const canSend = (provider) => CHANNELS.includes(providerChannel(provider));
 
 // Shown in the provider picker, e.g. "TWILIO (SMS)". The same account can later
 // be registered again for another channel, which the channel tells apart.
@@ -17,6 +22,25 @@ export const providerLabel = (provider) => {
   const channel = providerChannel(provider);
   return channel ? `${provider.id} (${channel})` : provider?.id ?? '';
 };
+
+// True when a provider sends Twilio's WhatsApp Content Template fields: a fixed
+// ContentSid and a ContentVariables value filled per message. For these, the
+// message box holds the template's variables as JSON, not free text.
+export function usesContentTemplate(provider) {
+  const fields = provider?.request?.body?.fields;
+  if (!fields || typeof fields !== 'object') return false;
+  return Object.keys(fields).some((name) => name.toLowerCase() === 'contentvariables');
+}
+
+// Whether this provider's request actually sends the typed message anywhere.
+// A Content Template with no variables (e.g. Twilio's "Delivery Updates") has
+// no {{text}} in its fields at all: ContentSid alone is enough, so the
+// message box is not required.
+export function needsMessageBody(provider) {
+  const fields = provider?.request?.body?.fields;
+  if (!fields || typeof fields !== 'object') return true;
+  return Object.values(fields).some((v) => typeof v === 'string' && v.includes('{{text}}'));
+}
 
 export const PROVIDER_EXAMPLE = {
   id: 'plivo',

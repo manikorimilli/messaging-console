@@ -38,16 +38,18 @@ describe('validateProviderConfig', () => {
     expect(problems).toContain('response is missing');
   });
 
-  it('needs one channel, and only SMS for now', () => {
+  it('needs one channel, SMS or WHATSAPP', () => {
     const problemsFor = (patch) => {
       const { channel: _c, ...rest } = PROVIDER_EXAMPLE;
       return validateProviderConfig({ ...rest, ...patch }).problems;
     };
     expect(problemsFor({ channel: 'SMS' })).toEqual([]);
     expect(problemsFor({ channel: 'sms' })).toEqual([]);
+    expect(problemsFor({ channel: 'WHATSAPP' })).toEqual([]);
+    expect(problemsFor({ channel: 'whatsapp' })).toEqual([]);
     expect(problemsFor({})).toEqual(['channel is missing, for example "SMS"']);
     expect(problemsFor({ channels: ['SMS'] })).toEqual(['Use "channel": "SMS" (one value) instead of "channels"']);
-    expect(problemsFor({ channel: 'WHATSAPP' })).toEqual(['channel "WHATSAPP" is not supported yet. Use "SMS".']);
+    expect(problemsFor({ channel: 'EMAIL' })).toEqual(['channel "EMAIL" is not supported. Use one of: SMS, WHATSAPP.']);
   });
 
   it('rejects bad ids, env placeholders, auth types and body formats', () => {

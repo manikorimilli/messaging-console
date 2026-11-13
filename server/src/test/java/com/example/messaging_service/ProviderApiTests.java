@@ -101,10 +101,17 @@ class ProviderApiTests {
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.detail")
 				.value("channel takes one value, for example \"SMS\"; register the provider once per channel"));
+		// WHATSAPP is a second supported channel, registered the same way as SMS.
 		mvc.perform(post("/api/v1/providers").contentType(MediaType.APPLICATION_JSON)
 			.content(ProviderExamples.PLIVO_JSON.replace("\"channel\": \"SMS\"", "\"channel\": \"WHATSAPP\"")))
+			.andExpect(status().isCreated())
+			.andExpect(jsonPath("$.channel").value("WHATSAPP"));
+		mvc.perform(delete("/api/v1/providers/PLIVO")).andExpect(status().isNoContent());
+
+		mvc.perform(post("/api/v1/providers").contentType(MediaType.APPLICATION_JSON)
+			.content(ProviderExamples.PLIVO_JSON.replace("\"channel\": \"SMS\"", "\"channel\": \"EMAIL\"")))
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.detail").value("channel must be one of [SMS]"));
+			.andExpect(jsonPath("$.detail").value("channel must be one of [SMS, WHATSAPP]"));
 		mvc.perform(post("/api/v1/providers").contentType(MediaType.APPLICATION_JSON)
 			.content(ProviderExamples.PLIVO_JSON.replace("\"channel\": \"SMS\",", "")))
 			.andExpect(status().isBadRequest())

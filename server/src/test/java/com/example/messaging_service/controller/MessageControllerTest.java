@@ -97,7 +97,7 @@ class MessageControllerTest {
 	void unknownTypeIsValidationFailure() throws Exception {
 		validationFailed(send("""
 				{ "type": "EMAIL", "provider": "TWILIO", "to": "+910000000001", "body": "Hi" }
-				""")).andExpect(jsonPath("$.detail").value("type must be one of [SMS]"));
+				""")).andExpect(jsonPath("$.detail").value("type must be one of [SMS, WHATSAPP]"));
 	}
 
 	@Test

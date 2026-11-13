@@ -9,6 +9,8 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.json.JsonCompareMode;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
 import com.example.messaging_service.dto.MessageType;
@@ -177,6 +181,46 @@ class ExtensibleProviderTest {
 					"""));
 
 		assertThat(provider.send(MESSAGE).providerMessageId()).isEqualTo("id-1");
+		server.verify();
+	}
+
+	@Test
+	void sendsWhatsAppWithTheWhatsappSchemeAndAContentTemplate() {
+		// A Twilio-style WhatsApp provider: To/From get the "whatsapp:" prefix in the
+		// template, and the message is sent as an approved Content Template (ContentSid
+		// fixed per provider, ContentVariables filled from the message body).
+		Map<String, String> variables = Map.of("account-sid", "AC123", "auth-token", "tok-123", "from",
+				"+14155238886", "content-sid", "HXb5b62575e6e4ff6129ad7c8efe1f983e");
+		Body whatsAppBody = new Body(BodyFormat.FORM,
+				Map.of("To", "whatsapp:{{to}}", "From", "whatsapp:{{from}}", "ContentSid", "{{content-sid}}",
+						"ContentVariables", "{{text}}"),
+				null);
+		Description description = new Description("TWILIO_WA", "Twilio WhatsApp", MessageType.WHATSAPP, variables,
+				new Request("POST", URL, new Auth(AuthType.BASIC, "{{account-sid}}", "{{auth-token}}", null, null, null),
+						whatsAppBody),
+				RESPONSE);
+		ExtensibleProvider provider = new ExtensibleProvider("twilio_wa", description, builder);
+		OutboundMessage whatsAppMessage = new OutboundMessage(MessageType.WHATSAPP, "+919492014400",
+				"{\"1\":\"12/1\",\"2\":\"3pm\"}");
+
+		String basic = Base64.getEncoder().encodeToString("AC123:tok-123".getBytes(StandardCharsets.UTF_8));
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+		form.add("To", "whatsapp:+919492014400");
+		form.add("From", "whatsapp:+14155238886");
+		form.add("ContentSid", "HXb5b62575e6e4ff6129ad7c8efe1f983e");
+		form.add("ContentVariables", "{\"1\":\"12/1\",\"2\":\"3pm\"}");
+
+		server.expect(requestTo(URL))
+			.andExpect(method(HttpMethod.POST))
+			.andExpect(header("Authorization", "Basic " + basic))
+			.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_FORM_URLENCODED))
+			.andExpect(content().formData(form))
+			.andRespond(withStatus(HttpStatus.ACCEPTED).contentType(MediaType.APPLICATION_JSON).body("""
+					{ "message_uuid": ["WA123"] }
+					"""));
+
+		assertThat(provider.send(whatsAppMessage).providerMessageId()).isEqualTo("WA123");
+		assertThat(provider.channel()).isEqualTo(MessageType.WHATSAPP);
 		server.verify();
 	}
 

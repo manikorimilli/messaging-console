@@ -29,20 +29,26 @@ class MessageTypeTest {
 	@ValueSource(strings = { "EMAIL", "", "  " })
 	void rejectsUnknownValues(String value) {
 		assertThatThrownBy(() -> MessageType.from(value)).isInstanceOf(IllegalArgumentException.class)
-			.hasMessage("type must be one of [SMS]");
+			.hasMessage("type must be one of [SMS, WHATSAPP]");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = { "WHATSAPP", "whatsapp", "WhatsApp" })
+	void acceptsWhatsAppInAnyLetterCase(String value) {
+		assertThat(MessageType.from(value)).isEqualTo(MessageType.WHATSAPP);
 	}
 
 	@Test
 	void jacksonUsesTheCreatorForLowercaseJson() {
 		assertThat(mapper.readValue("\"sms\"", MessageType.class)).isEqualTo(MessageType.SMS);
+		assertThat(mapper.readValue("\"whatsapp\"", MessageType.class)).isEqualTo(MessageType.WHATSAPP);
 	}
 
 	@Test
 	void jacksonFailsOnUnknownJsonValue() {
-		assertThatThrownBy(() -> mapper.readValue("\"WHATSAPP\"", MessageType.class))
-			.isInstanceOf(JacksonException.class)
+		assertThatThrownBy(() -> mapper.readValue("\"EMAIL\"", MessageType.class)).isInstanceOf(JacksonException.class)
 			.rootCause()
-			.hasMessage("type must be one of [SMS]");
+			.hasMessage("type must be one of [SMS, WHATSAPP]");
 	}
 
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { providerChannel, providerLabel, supportsSms } from '../utils/providerConfig.js';
+import { canSend, providerChannel, providerLabel, usesContentTemplate } from '../utils/providerConfig.js';
 
 describe('provider channel and label', () => {
   it('reads the one channel, or the first of an older channels list', () => {
@@ -13,8 +13,16 @@ describe('provider channel and label', () => {
     expect(providerLabel({ id: 'TWILIO' })).toBe('TWILIO');
   });
 
-  it('only SMS providers can send for now', () => {
-    expect(supportsSms({ channel: 'SMS' })).toBe(true);
-    expect(supportsSms({ channel: 'WHATSAPP' })).toBe(false);
+  it('SMS and WhatsApp providers can both send', () => {
+    expect(canSend({ channel: 'SMS' })).toBe(true);
+    expect(canSend({ channel: 'WHATSAPP' })).toBe(true);
+    expect(canSend({ channel: 'EMAIL' })).toBe(false);
+    expect(canSend({})).toBe(false);
+  });
+
+  it('detects a WhatsApp Content Template provider by its ContentVariables field', () => {
+    expect(usesContentTemplate({ request: { body: { fields: { ContentVariables: '{{text}}' } } } })).toBe(true);
+    expect(usesContentTemplate({ request: { body: { fields: { Body: '{{text}}' } } } })).toBe(false);
+    expect(usesContentTemplate({})).toBe(false);
   });
 });

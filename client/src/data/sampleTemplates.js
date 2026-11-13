@@ -1,5 +1,6 @@
 // Frontend-only templates. They are not stored on or known to the backend;
 // picking one only fills the message box, and the text is sent as `body`.
+import { providerChannel, usesContentTemplate } from '../utils/providerConfig.js';
 
 // Twilio test accounts only accept these exact test values as the body.
 export const TWILIO_TEMPLATES = [
@@ -46,19 +47,24 @@ export const GENERAL_TEMPLATES = [
 
 const TWILIO_API = /^https?:\/\/([\w-]+\.)*twilio\.com(\/|$)/i;
 
-// True for a Twilio provider, whatever id it was registered under: its request
-// goes to twilio.com, or its id starts with TWILIO (e.g. TWILIO, TWILIO2).
-// Accepts a provider object from the list, or just an id.
+// True for a Twilio SMS provider, whatever id it was registered under: its
+// request goes to twilio.com, or its id starts with TWILIO (e.g. TWILIO, TWILIO2).
+// Accepts a provider object from the list, or just an id. A Twilio provider on
+// the WHATSAPP channel does not use these SMS-only test values.
 export function usesTwilioTemplates(provider) {
   if (!provider) return false;
+  if (providerChannel(provider) === 'WHATSAPP') return false;
   const id = String(typeof provider === 'string' ? provider : provider.id ?? '').toUpperCase();
   const url = typeof provider === 'string' ? '' : provider.request?.url ?? '';
   return TWILIO_API.test(url) || id.startsWith('TWILIO');
 }
 
-// Twilio free-tier accounts only accept these test values; other providers get
-// free-text samples. Nothing until a provider is chosen.
+// Only the Twilio test templates are offered, for every provider and channel
+// (SMS, WhatsApp, Vonage, ...). A WhatsApp provider that sends an approved
+// Content Template has no free-text samples to offer (its message box holds
+// the template's variables as JSON instead). Nothing until a provider is chosen.
 export function templatesForProvider(provider) {
   if (!provider) return [];
-  return usesTwilioTemplates(provider) ? TWILIO_TEMPLATES : GENERAL_TEMPLATES;
+  if (usesContentTemplate(provider)) return [];
+  return TWILIO_TEMPLATES;
 }

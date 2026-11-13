@@ -17,6 +17,7 @@ import { EmptyState, LoadingState } from '../components/States.jsx';
 import { useAsyncAction } from '../hooks/useAsyncAction.js';
 import { useProviders } from '../hooks/useProviders.js';
 import { formatDateTime } from '../utils/format.js';
+import { needsMessageBody, providerChannel } from '../utils/providerConfig.js';
 import { validateBody, validatePhone } from '../utils/validation.js';
 
 function ResultDetail({ label, children, title }) {
@@ -76,16 +77,21 @@ export function SendSmsPage() {
   const [touched, setTouched] = useState({ provider: false, to: false, body: false });
   const send = useAsyncAction((input) => api.sendSms(input));
 
+  const selectedProvider = providersState.providers.find((p) => p.id === provider);
   const providerError = provider ? null : 'Choose a provider';
   const toError = validatePhone(to);
-  const bodyError = validateBody(body);
+  const bodyRequired = !selectedProvider || needsMessageBody(selectedProvider);
+  const bodyError = bodyRequired ? validateBody(body) : null;
   const showToError = touched.to && Boolean(toError);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setTouched({ provider: true, to: true, body: true });
     if (providerError || toError || bodyError || send.pending) return;
-    await send.run({ provider, to: to.trim(), body });
+    // The backend always requires a non-blank body; a template with no variables
+    // ignores it, so send a fixed placeholder instead of asking the user for one.
+    const sentBody = bodyRequired ? body : '(not used by this template)';
+    await send.run({ provider, to: to.trim(), body: sentBody, type: providerChannel(selectedProvider) || 'SMS' });
   }
 
   return (
@@ -144,11 +150,12 @@ export function SendSmsPage() {
 
             <MessageField
               id="send-body"
-              provider={providersState.providers.find((p) => p.id === provider)}
+              provider={selectedProvider}
               value={body}
               onChange={setBody}
               onBlur={() => setTouched((t) => ({ ...t, body: true }))}
               error={touched.body ? bodyError : null}
+              required={bodyRequired}
               disabled={send.pending}
             />
           </div>

@@ -1,6 +1,6 @@
 # Messaging Console: how it works
 
-One REST API that sends SMS through any provider you register. There are no built-in providers:
+One REST API that sends SMS or WhatsApp messages through any provider you register. There are no built-in providers:
 each provider (Twilio, Vonage, ...) is a JSON definition registered through the API and kept in
 `db.json`. Adding a provider needs no code change; that is what the **extensible provider** does.
 
@@ -19,13 +19,14 @@ each provider (Twilio, Vonage, ...) is a JSON definition registered through the 
 
 ## A provider definition
 
-Ready-to-fill examples: `docs/providers/twilio.json` and `docs/providers/vonage.json`.
+Ready-to-fill examples: `docs/providers/twilio.json`, `docs/providers/vonage.json`,
+`docs/providers/twilio-whatsapp.json` and `docs/providers/twilio-whatsapp-template.json`.
 
 | Field | Meaning |
 |---|---|
 | `id` | Name used when sending, e.g. `TWILIO`. Stored in upper case. |
 | `display-name` | Name shown in messages, e.g. `Twilio` |
-| `channel` | The one channel it sends on. Only `SMS` today. The same account on another channel is registered again. |
+| `channel` | The one channel it sends on: `SMS` or `WHATSAPP`. The same account on another channel is registered again. |
 | `enabled` | Only enabled providers can send |
 | `variables` | Keys and settings, e.g. `api-key`, `from`. Every one needs a value when enabled. |
 | `request` | Method, URL, authentication (`basic`, `bearer`, `header`, `none`) and body (`json` or `form`) |
@@ -43,6 +44,23 @@ Templates in `request` use placeholders, filled in for each message:
 | `{{text}}`, `{uaap.message.text}` or `{uaap.message.template}` | The message |
 
 Recipient and message values are not allowed in the URL. `${...}` is never a placeholder.
+
+### WhatsApp
+
+Register a `WHATSAPP` provider the same way as an `SMS` one. WhatsApp numbers carry a
+`whatsapp:` scheme on the wire; add it in the field templates, not in `variables`:
+
+```json
+"fields": { "To": "whatsapp:{{to}}", "From": "whatsapp:{{from}}", "Body": "{{text}}" }
+```
+
+This sends free text and only reaches a recipient within 24 hours of their last message to
+you (WhatsApp's "session" window; see `docs/providers/twilio-whatsapp.json`). Outside that
+window, or to start a conversation, WhatsApp requires an approved **template**. Twilio sends
+these as `ContentSid` (fixed per approved template) and `ContentVariables` (the template's
+values as one JSON object, e.g. `{"1":"12/1","2":"3pm"}`). Register one provider per template,
+with the template's id in `variables`, and send the `ContentVariables` JSON as the message
+`body`; see `docs/providers/twilio-whatsapp-template.json`.
 
 ## Sending one message
 
@@ -89,7 +107,7 @@ provider/     MessageProvider, OutboundMessage, ProviderResult   what sending ne
               DescriptionValidator                         checks a definition before it is saved
               TemplateFiller                               fills the placeholders
               ResponseReader                               reads the reply: success, id, errors, retry
-              GsmCharset                                   tells plain SMS text from Unicode
+              GsmCharset                                   tells plain SMS text from Unicode (GSM-7)
   store/      ProviderStore                                reads and writes db.json safely
 dto/          request and response shapes
 exception/    ErrorCode, MessagingException, GlobalExceptionHandler

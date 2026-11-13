@@ -9,9 +9,11 @@ export { ApiError } from './ApiError.js';
 
 const impl = config.useMockApi ? mockApi : realApi;
 
-// Every send names its provider; the backend has no default one.
-export function buildSmsRequest({ provider, to, body }) {
-  return { type: 'SMS', provider, to, body };
+// Every send names its provider; the backend has no default one. `type` is the
+// provider's own channel (SMS or WHATSAPP), defaulting to SMS for callers that
+// do not pass it.
+export function buildSmsRequest({ provider, to, body, type = 'SMS' }) {
+  return { type, provider, to, body };
 }
 
 export const api = {

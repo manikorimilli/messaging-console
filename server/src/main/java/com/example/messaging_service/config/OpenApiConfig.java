@@ -27,7 +27,7 @@ public class OpenApiConfig {
 	public OpenAPI messagingOpenApi() {
 		return new OpenAPI().info(new Info().title("Messaging Service API")
 			.version("v1")
-			.description("Send SMS through providers registered through the API."));
+			.description("Send SMS or WhatsApp messages through providers registered through the API."));
 	}
 
 	/**

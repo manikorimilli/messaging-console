@@ -1,4 +1,4 @@
-import { AUTH_TYPES, BODY_FORMATS, MASKED_VALUE } from './providerConfig.js';
+import { AUTH_TYPES, BODY_FORMATS, CHANNELS, MASKED_VALUE } from './providerConfig.js';
 import { detectParameters, hasPlaceholder, placeholderProblems } from './providerParams.js';
 
 export const E164_PATTERN = /^\+[1-9]\d{7,14}$/;
@@ -64,8 +64,8 @@ export function validateProviderConfig(cfg, { mode = 'create', pathId, requireVa
     problems.push('Use "channel": "SMS" (one value) instead of "channels"');
   } else if (typeof cfg.channel !== 'string' || !cfg.channel.trim()) {
     problems.push('channel is missing, for example "SMS"');
-  } else if (cfg.channel.trim().toUpperCase() !== 'SMS') {
-    problems.push(`channel "${cfg.channel}" is not supported yet. Use "SMS".`);
+  } else if (!CHANNELS.includes(cfg.channel.trim().toUpperCase())) {
+    problems.push(`channel "${cfg.channel}" is not supported. Use one of: ${CHANNELS.join(', ')}.`);
   }
 
   if (cfg.enabled !== undefined && typeof cfg.enabled !== 'boolean') {

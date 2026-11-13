@@ -1,13 +1,13 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { providerLabel, supportsSms } from '../utils/providerConfig.js';
+import { canSend, providerLabel } from '../utils/providerConfig.js';
 import { FormField, controlClass } from './FormField.jsx';
 import { StatusBadge } from './StatusBadge.jsx';
 
 // A provider must be chosen: its config decides which uaap parameters the send
 // fills. `error` is a load failure; `invalid` is the "choose one" message.
 export function ProviderSelect({ id, value, onChange, providers, loading, error, invalid, onBlur, disabled }) {
-  const smsProviders = providers.filter(supportsSms);
+  const sendableProviders = providers.filter(canSend);
 
   let hint = 'Choose the provider that sends this message.';
   if (loading && providers.length === 0) hint = 'Loading providers...';
@@ -25,12 +25,12 @@ export function ProviderSelect({ id, value, onChange, providers, loading, error,
           <SelectValue placeholder="Choose a provider" />
         </SelectTrigger>
         <SelectContent position="popper" className="rounded-xl">
-          {smsProviders.length === 0 && (
+          {sendableProviders.length === 0 && (
             <SelectItem value="__none__" disabled>
-              No SMS providers
+              No providers
             </SelectItem>
           )}
-          {smsProviders.map((p) => (
+          {sendableProviders.map((p) => (
             <SelectItem key={p.id} value={p.id} disabled={!p.enabled}>
               {providerLabel(p)}
               {!p.enabled && <StatusBadge className="h-5">Disabled</StatusBadge>}

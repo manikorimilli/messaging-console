@@ -1,23 +1,29 @@
 import { describe, expect, it } from 'vitest';
-import { GENERAL_TEMPLATES, TWILIO_TEMPLATES, templatesForProvider } from '../data/sampleTemplates.js';
+import { TWILIO_TEMPLATES, templatesForProvider } from '../data/sampleTemplates.js';
 
 describe('templatesForProvider', () => {
-  it('uses the Twilio test values for any Twilio provider', () => {
+  it('uses the Twilio test values for any provider, any channel', () => {
     expect(templatesForProvider('TWILIO')).toBe(TWILIO_TEMPLATES);
     expect(templatesForProvider('twilio2')).toBe(TWILIO_TEMPLATES);
-    // Registered under any id: recognised by its Twilio address.
-    const myTwilio = { id: 'MY-SMS', request: { url: 'https://api.twilio.com/2010-04-01/Accounts/{{account-sid}}/Messages.json' } };
-    expect(templatesForProvider(myTwilio)).toBe(TWILIO_TEMPLATES);
-  });
-  it('keeps the free-text samples for other providers', () => {
-    expect(templatesForProvider('VONAGE')).toBe(GENERAL_TEMPLATES);
-    expect(templatesForProvider({ id: 'VONAGE', request: { url: 'https://rest.nexmo.com/sms/json' } })).toBe(GENERAL_TEMPLATES);
-    // A look-alike address is not Twilio.
-    expect(templatesForProvider({ id: 'X', request: { url: 'https://api.twilio.com.evil.test/send' } })).toBe(GENERAL_TEMPLATES);
+    expect(templatesForProvider('VONAGE')).toBe(TWILIO_TEMPLATES);
+    const twilioWhatsApp = {
+      id: 'TWILIO',
+      channel: 'WHATSAPP',
+      request: { url: 'https://api.twilio.com/2010-04-01/Accounts/{{account-sid}}/Messages.json', body: { fields: { Body: '{{text}}' } } },
+    };
+    expect(templatesForProvider(twilioWhatsApp)).toBe(TWILIO_TEMPLATES);
   });
   it('offers nothing until a provider is chosen', () => {
     expect(templatesForProvider(undefined)).toEqual([]);
     expect(templatesForProvider('')).toEqual([]);
+  });
+  it('offers no samples for a WhatsApp Content Template provider', () => {
+    const contentTemplateProvider = {
+      id: 'TWILIO_WA',
+      channel: 'WHATSAPP',
+      request: { url: 'https://api.twilio.com/2010-04-01/Accounts/{{account-sid}}/Messages.json', body: { fields: { ContentVariables: '{{text}}' } } },
+    };
+    expect(templatesForProvider(contentTemplateProvider)).toEqual([]);
   });
   it('sends the exact Twilio body values', () => {
     expect(TWILIO_TEMPLATES.map((t) => t.text)).toEqual([

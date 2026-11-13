@@ -1,0 +1,49 @@
+{
+  "id": "TWILIO_WHATSAPP_APPOINTMENT",
+  "display-name": "Twilio WhatsApp - Appointment Reminder",
+  "channel": "WHATSAPP",
+  "enabled": true,
+  "variables": {
+    "account-sid": "",
+    "auth-token": "",
+    "from": "+14155238886",
+    "content-sid": "HXb5b62575e6e4ff6129ad7c8efe1f983e"
+  },
+  "request": {
+    "method": "POST",
+    "url": "https://api.twilio.com/2010-04-01/Accounts/{{account-sid}}/Messages.json",
+    "auth": {
+      "type": "basic",
+      "username": "{{account-sid}}",
+      "password": "{{auth-token}}"
+    },
+    "body": {
+      "format": "form",
+      "fields": {
+        "To": "whatsapp:{{to}}",
+        "From": "whatsapp:{{from}}",
+        "ContentSid": "{{content-sid}}",
+        "ContentVariables": "{{text}}"
+      }
+    }
+  },
+  "response": {
+    "success": {
+      "http-status": [
+        "2xx"
+      ]
+    },
+    "id-path": "$.sid",
+    "status-path": "$.status",
+    "error": {
+      "code-path": "$.code",
+      "message-path": "$.message"
+    },
+    "retry": {
+      "http-status": [
+        "429",
+        "5xx"
+      ]
+    }
+  }
+}

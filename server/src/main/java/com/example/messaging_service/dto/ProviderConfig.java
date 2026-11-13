@@ -1,5 +1,6 @@
 package com.example.messaging_service.dto;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -61,7 +62,7 @@ public record ProviderConfig(String id, String displayName, MessageType channel,
 			return MessageType.from(value);
 		}
 		catch (IllegalArgumentException e) {
-			throw new IllegalArgumentException("channel must be one of [SMS]");
+			throw new IllegalArgumentException("channel must be one of " + Arrays.toString(MessageType.values()));
 		}
 	}
 
