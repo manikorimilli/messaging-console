@@ -2,31 +2,33 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import * as mock from '../api/mockApi.js';
 import { PROVIDER_EXAMPLE } from '../utils/providerConfig.js';
 
+// PROVIDER_EXAMPLE registers as PLIVO, an enabled SMS provider.
+const DISABLED = { ...PROVIDER_EXAMPLE, id: 'quiet', 'display-name': 'Quiet', enabled: false };
+
 beforeEach(() => {
   mock.setMockLatency(0);
   mock.resetMockStore();
 });
 
 describe('mock providers', () => {
-  it('lists providers sorted by id with secrets masked', async () => {
-    const list = await mock.listProviders();
-    expect(list.map((p) => p.id)).toEqual(['MSG91', 'TEXTLOCAL', 'TWILIO', 'VONAGE']);
-    const twilio = list.find((p) => p.id === 'TWILIO');
-    expect(twilio).toMatchObject({ channel: 'SMS', enabled: true });
-    expect(twilio.variables['auth-token']).toBe('****');
-    expect(twilio.variables.from).toBe('+10000000001');
+  it('starts with no providers, like a fresh backend', async () => {
+    await expect(mock.listProviders()).resolves.toEqual([]);
   });
 
-  it('looks up ids case-insensitively', async () => {
-    await expect(mock.getProvider('twilio')).resolves.toMatchObject({ id: 'TWILIO' });
-    await expect(mock.getProvider('nope')).rejects.toMatchObject({ status: 404, code: 'PROVIDER_NOT_FOUND' });
-  });
-
-  it('registers with uppercase id, rejects duplicates', async () => {
+  it('registers with uppercase id, masks secrets, rejects duplicates', async () => {
     const saved = await mock.registerProvider(PROVIDER_EXAMPLE);
     expect(saved).toMatchObject({ id: 'PLIVO', channel: 'SMS', enabled: true });
     expect(saved.variables['auth-token']).toBe('****');
+    expect(saved.variables.from).toBe('+10000000001');
     await expect(mock.registerProvider(PROVIDER_EXAMPLE)).rejects.toMatchObject({ status: 409, code: 'PROVIDER_ALREADY_EXISTS' });
+  });
+
+  it('lists providers sorted by id and looks them up case-insensitively', async () => {
+    await mock.registerProvider(PROVIDER_EXAMPLE);
+    await mock.registerProvider(DISABLED);
+    expect((await mock.listProviders()).map((p) => p.id)).toEqual(['PLIVO', 'QUIET']);
+    await expect(mock.getProvider('plivo')).resolves.toMatchObject({ id: 'PLIVO' });
+    await expect(mock.getProvider('nope')).rejects.toMatchObject({ status: 404, code: 'PROVIDER_NOT_FOUND' });
   });
 
   it('keeps the stored secret when an update sends ****', async () => {
@@ -44,21 +46,23 @@ describe('mock providers', () => {
     ).rejects.toMatchObject({ code: 'VALIDATION_FAILED' });
   });
 
-  it('every provider can be edited and removed', async () => {
-    const twilio = await mock.getProvider('TWILIO');
-    await expect(mock.updateProvider('TWILIO', { ...twilio, 'display-name': 'Twilio 2' })).resolves.toMatchObject({
-      'display-name': 'Twilio 2',
-    });
-    await expect(mock.deleteProvider('MSG91')).resolves.toBeNull();
-    await expect(mock.getProvider('MSG91')).rejects.toMatchObject({ code: 'PROVIDER_NOT_FOUND' });
+  it('removes a provider', async () => {
+    await mock.registerProvider(PROVIDER_EXAMPLE);
+    await expect(mock.deleteProvider('plivo')).resolves.toBeNull();
+    await expect(mock.getProvider('PLIVO')).rejects.toMatchObject({ code: 'PROVIDER_NOT_FOUND' });
   });
 });
 
 describe('mock sends', () => {
+  beforeEach(async () => {
+    await mock.registerProvider(PROVIDER_EXAMPLE);
+    await mock.registerProvider(DISABLED);
+  });
+
   it('sends through the named provider', async () => {
-    const res = await mock.sendSms({ type: 'SMS', provider: 'twilio', to: '+910000000001', body: 'Hello' });
-    expect(res).toMatchObject({ status: 'ACCEPTED', provider: 'TWILIO', providerStatus: 'queued' });
-    expect(res.providerMessageId).toMatch(/^SM/);
+    const res = await mock.sendSms({ type: 'SMS', provider: 'plivo', to: '+910000000001', body: 'Hello' });
+    expect(res).toMatchObject({ status: 'ACCEPTED', provider: 'PLIVO', providerStatus: 'accepted' });
+    expect(res.providerMessageId).toBeTruthy();
   });
 
   it('needs a registered provider, like the backend', async () => {
@@ -70,17 +74,19 @@ describe('mock sends', () => {
     await expect(mock.sendSms({ type: 'SMS', provider: 'NOPE', to: '+910000000001', body: 'Hello' })).rejects.toMatchObject({
       status: 400,
       code: 'UNSUPPORTED_PROVIDER',
+      detail: "Provider 'NOPE' is not registered. Registered providers: PLIVO, QUIET.",
     });
   });
 
   it('rejects disabled providers with 503', async () => {
-    await expect(
-      mock.sendSms({ type: 'SMS', provider: 'textlocal', to: '+910000000001', body: 'Hello' }),
-    ).rejects.toMatchObject({ status: 503, code: 'PROVIDER_UNAVAILABLE' });
+    await expect(mock.sendSms({ type: 'SMS', provider: 'quiet', to: '+910000000001', body: 'Hello' })).rejects.toMatchObject({
+      status: 503,
+      code: 'PROVIDER_UNAVAILABLE',
+    });
   });
 
   it('attaches the problem body to failed sends', async () => {
-    await expect(mock.sendSms({ type: 'SMS', provider: 'TWILIO', to: '+910000001000', body: 'Hello' })).rejects.toMatchObject({
+    await expect(mock.sendSms({ type: 'SMS', provider: 'PLIVO', to: '+910000001000', body: 'Hello' })).rejects.toMatchObject({
       status: 502,
       body: { status: 502, code: 'PROVIDER_REJECTED', title: 'Provider rejected the message', providerErrorCode: '21211' },
     });

@@ -31,8 +31,8 @@ You need **Java 21 or newer** and **Node.js 22.12 or newer**. Install steps for 
    ```
 
    In `client/.env`, set `VITE_USE_MOCK_API=false` and keep
-   `DEV_PROXY_TARGET=http://localhost:8080`. (Leave it `true` to try the console with sample data
-   and no server.)
+   `DEV_PROXY_TARGET=http://localhost:8080`. (Set it to `true` to try the console without the server:
+   everything is simulated in the browser, and it starts with no providers, so register one first.)
 
 3. Start the server and the client together:
 

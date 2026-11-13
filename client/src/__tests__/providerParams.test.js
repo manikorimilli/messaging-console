@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import * as mock from '../api/mockApi.js';
-import { MOCK_PROVIDERS } from '../api/mockData.js';
 import { PROVIDER_EXAMPLE } from '../utils/providerConfig.js';
 import {
   BACKEND_BUILT_INS,
@@ -99,21 +98,6 @@ describe('withParameterValues', () => {
     const cfg = { id: 'demo', variables: { from: 'OLD' } };
     expect(withParameterValues(cfg, { from: '' })).toBe(cfg);
     expect(withParameterValues({ id: 'demo' }, { token: 'abc' })).toEqual({ id: 'demo', variables: { token: 'abc' } });
-  });
-});
-
-describe('parameters in the mock providers', () => {
-  it('finds every provider parameter, each with a value in variables', () => {
-    for (const provider of MOCK_PROVIDERS) {
-      const { provider: names, sendTime } = detectParameters(provider);
-      expect(names.length, provider.id).toBeGreaterThan(0);
-      expect(names.every((name) => name in provider.variables), provider.id).toBe(true);
-      expect(sendTime.every(isSendTimeParameter), provider.id).toBe(true);
-    }
-    expect(detectParameters(MOCK_PROVIDERS.find((p) => p.id === 'TEXTLOCAL'))).toEqual({
-      provider: ['api-token', 'sender'],
-      sendTime: ['to_digits', 'text'],
-    });
   });
 });
 

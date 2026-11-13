@@ -14,7 +14,7 @@ a message through one of them. Follow these steps to run it locally. It takes ab
 |---|---|---|
 | REQUIRED | **Node.js 22.12 or newer** | Comes with npm. Install commands are in step 1. |
 | REQUIRED | **Git** | To download the code. Install commands are in step 1. |
-| OPTIONAL | **The backend** | Only for live data. Without it, the app runs with sample data. |
+| OPTIONAL | **The backend** | Only for live data. Without it, the app runs in mock mode, simulated in your browser. |
 
 > You don't need the backend to try the app. In **mock mode** (the default) providers and sends are
 > simulated in your browser.
@@ -160,7 +160,9 @@ http://localhost:5173
 
 The bottom of the sidebar shows **Mock mode** or a green **Live** badge, matching your choice in step 5.
 
-Then send a test SMS: open **Send Message**, choose a provider, enter a number in international format (for example
+In mock mode the app starts with no providers: on **Providers**, click **Register provider**, paste
+`docs/providers/twilio.json` and fill the boxes with any made-up values. Then send a test SMS: open
+**Send Message**, choose the provider, enter a number in international format (for example
 `+910000000001`), pick a message from the template menu, and click **Send Message**. A green
 **Accepted by provider** card means it worked.
 

@@ -42,8 +42,9 @@ Keep `VITE_USE_MOCK_API=true` and start the app:
 npm run dev
 ```
 
-Open `http://localhost:5173`. The sidebar shows **Mock mode**. Data lives in the browser and resets
-on reload.
+Open `http://localhost:5173`. The sidebar shows **Mock mode**. It starts with no providers, like a fresh
+backend: register one on the Providers page first (any file from `docs/providers/`, with made-up keys).
+Data lives in the browser and resets on reload.
 
 ### Local backend
 
