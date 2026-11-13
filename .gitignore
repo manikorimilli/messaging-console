@@ -1,0 +1,19 @@
+# Shared ignores for the whole repository. server/.gitignore and client/.gitignore add
+# their own (build output, db.json, ...).
+
+# Packages for the top-level shortcuts (npm run dev)
+node_modules/
+
+# Local settings and secrets, wherever they are
+.env
+.env.*
+!.env.example
+
+# Editors and operating systems
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Logs
+*.log

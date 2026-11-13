@@ -1,0 +1,20 @@
+{
+  "name": "messaging-console",
+  "private": true,
+  "description": "Shortcuts that start and test the server (Java, Maven) and the client (React, Vite) together.",
+  "scripts": {
+    "setup": "npm install --prefix client",
+    "dev": "concurrently --names server,client --prefix-colors blue,green --kill-others \"npm:dev:server\" \"npm:dev:client\"",
+    "dev:server": "node scripts/server.mjs",
+    "dev:client": "npm run dev --prefix client",
+    "test": "npm run test:server && npm run test:client",
+    "test:server": "node scripts/server.mjs test",
+    "test:client": "npm test --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.7"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

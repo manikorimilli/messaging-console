@@ -1,0 +1,181 @@
+package com.example.messaging_service;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import com.example.messaging_service.dto.MessageType;
+import com.example.messaging_service.dto.ProviderConfig;
+import com.example.messaging_service.provider.extensible.ExtensibleProviderDefinition.Auth;
+import com.example.messaging_service.provider.extensible.ExtensibleProviderDefinition.AuthType;
+import com.example.messaging_service.provider.extensible.ExtensibleProviderDefinition.Body;
+import com.example.messaging_service.provider.extensible.ExtensibleProviderDefinition.BodyFormat;
+import com.example.messaging_service.provider.extensible.ExtensibleProviderDefinition.ErrorPaths;
+import com.example.messaging_service.provider.extensible.ExtensibleProviderDefinition.Request;
+import com.example.messaging_service.provider.extensible.ExtensibleProviderDefinition.Response;
+
+/** A Plivo provider as sent to the provider APIs, with test values. */
+public final class ProviderExamples {
+
+	private ProviderExamples() {
+	}
+
+	public static Map<String, String> plivoVariables() {
+		Map<String, String> variables = new LinkedHashMap<>();
+		variables.put("auth-id", "MA123");
+		variables.put("auth-token", "real-token");
+		variables.put("from", "+15550001111");
+		return variables;
+	}
+
+	public static ProviderConfig plivo() {
+		return plivo(true, plivoVariables());
+	}
+
+	public static ProviderConfig plivo(boolean enabled, Map<String, String> variables) {
+		return new ProviderConfig("PLIVO", "Plivo", MessageType.SMS, enabled, variables,
+				new Request("POST", "https://api.plivo.com/v1/Account/{{auth-id}}/Message/",
+						new Auth(AuthType.BASIC, "{{auth-id}}", "{{auth-token}}", null, null, null),
+						new Body(BodyFormat.JSON, Map.of("src", "{{from}}", "dst", "{{to_digits}}", "text", "{{text}}"),
+								null)),
+				new Response(null, "$.message_uuid[0]", null, new ErrorPaths(null, "$.error"), null));
+	}
+
+	/** The same Plivo provider as the JSON body a client sends. */
+	public static final String PLIVO_JSON = """
+			{
+			  "id": "plivo",
+			  "display-name": "Plivo",
+			  "channel": "SMS",
+			  "enabled": true,
+			  "variables": { "auth-id": "MA123", "auth-token": "real-token", "from": "+15550001111" },
+			  "request": {
+			    "method": "POST",
+			    "url": "https://api.plivo.com/v1/Account/{{auth-id}}/Message/",
+			    "auth": { "type": "basic", "username": "{{auth-id}}", "password": "{{auth-token}}" },
+			    "body": {
+			      "format": "json",
+			      "fields": { "src": "{{from}}", "dst": "{{to_digits}}", "text": "{{text}}" }
+			    }
+			  },
+			  "response": {
+			    "success": { "http-status": ["2xx"] },
+			    "id-path": "$.message_uuid[0]",
+			    "error": { "message-path": "$.error" }
+			  }
+			}
+			""";
+
+	/** The former built-in Twilio block as a registration body, with test values. */
+	public static final String TWILIO_JSON = """
+			{
+			  "id": "TWILIO",
+			  "display-name": "Twilio",
+			  "channel": "SMS",
+			  "enabled": true,
+			  "variables": {
+			    "account-sid": "ACtest",
+			    "api-key": "SKtest",
+			    "api-secret": "test-secret",
+			    "from": "+15550001111"
+			  },
+			  "request": {
+			    "method": "POST",
+			    "url": "https://api.twilio.com/2010-04-01/Accounts/{{account-sid}}/Messages.json",
+			    "auth": {
+			      "type": "basic",
+			      "username": "{{api-key}}",
+			      "password": "{{api-secret}}"
+			    },
+			    "body": {
+			      "format": "form",
+			      "fields": {
+			        "To": "{{to}}",
+			        "From": "{{from}}",
+			        "Body": "{{text}}"
+			      }
+			    }
+			  },
+			  "response": {
+			    "success": {
+			      "http-status": [
+			        "2xx"
+			      ]
+			    },
+			    "id-path": "$.sid",
+			    "status-path": "$.status",
+			    "error": {
+			      "code-path": "$.code",
+			      "message-path": "$.message"
+			    },
+			    "retry": {
+			      "http-status": [
+			        "429",
+			        "5xx"
+			      ]
+			    }
+			  }
+			}
+			""";
+
+	/** The former built-in Vonage block as a registration body, with test values. */
+	public static final String VONAGE_JSON = """
+			{
+			  "id": "VONAGE",
+			  "display-name": "Vonage",
+			  "channel": "SMS",
+			  "enabled": true,
+			  "variables": {
+			    "api-key": "test-key",
+			    "api-secret": "test-secret",
+			    "from": "MyBrand"
+			  },
+			  "request": {
+			    "method": "POST",
+			    "url": "https://rest.nexmo.com/sms/json",
+			    "auth": {
+			      "type": "basic",
+			      "username": "{{api-key}}",
+			      "password": "{{api-secret}}"
+			    },
+			    "body": {
+			      "format": "form",
+			      "fields": {
+			        "from": "{{from}}",
+			        "to": "{{to_digits}}",
+			        "text": "{{text}}"
+			      },
+			      "unicode-fields": {
+			        "type": "unicode"
+			      }
+			    }
+			  },
+			  "response": {
+			    "success": {
+			      "http-status": [
+			        "200"
+			      ],
+			      "each": "$.messages",
+			      "field": "status",
+			      "expected": "0"
+			    },
+			    "id-path": "$.messages[0].message-id",
+			    "status-path": "$.messages[0].status",
+			    "error": {
+			      "code-path": "$.messages[?(@.status != '0')].status",
+			      "message-path": "$.messages[?(@.status != '0')].error-text"
+			    },
+			    "retry": {
+			      "http-status": [
+			        "429",
+			        "5xx"
+			      ],
+			      "codes": [
+			        "1",
+			        "5"
+			      ]
+			    }
+			  }
+			}
+			""";
+
+}

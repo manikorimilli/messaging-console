@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "messaging-console", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 5173 },
+    {
+      "name": "client-mock",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["VITE_USE_MOCK_API=true", "npm", "run", "dev", "--prefix", "client", "--", "--port", "5181", "--strictPort"],
+      "port": 5181
+    }
+  ]
+}

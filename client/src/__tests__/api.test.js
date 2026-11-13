@@ -1,0 +1,100 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { buildSmsRequest } from '../api/index.js';
+import { request } from '../api/httpClient.js';
+
+describe('request builders', () => {
+  it('always includes the provider', () => {
+    expect(buildSmsRequest({ provider: 'TWILIO', to: '+910000000001', body: 'Hi' })).toEqual({
+      type: 'SMS',
+      provider: 'TWILIO',
+      to: '+910000000001',
+      body: 'Hi',
+    });
+  });
+});
+
+describe('httpClient.request', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('returns null for 204 without reading the body', async () => {
+    const text = vi.fn();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ status: 204, ok: true, text }));
+    await expect(request('DELETE', '/api/v1/providers/X')).resolves.toBeNull();
+    expect(text).not.toHaveBeenCalled();
+  });
+
+  it('sends JSON with the right content type', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ status: 202, ok: true, text: async () => '{"status":"ACCEPTED"}' });
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(request('POST', '/api/v1/messages', { a: 1 })).resolves.toEqual({ status: 'ACCEPTED' });
+    const [, init] = fetchMock.mock.calls[0];
+    expect(init.headers['Content-Type']).toBe('application/json');
+    expect(init.body).toBe('{"a":1}');
+  });
+
+  it('turns a problem response into an ApiError with detail, problems and providerErrorCode', async () => {
+    const body = {
+      title: 'Provider rejected the message',
+      status: 502,
+      detail: 'Invalid number',
+      code: 'PROVIDER_REJECTED',
+      providerErrorCode: '21211',
+      problems: ['to is invalid'],
+    };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ status: 502, ok: false, text: async () => JSON.stringify(body) }));
+    await expect(request('POST', '/api/v1/messages', {})).rejects.toMatchObject({
+      name: 'ApiError',
+      status: 502,
+      code: 'PROVIDER_REJECTED',
+      detail: 'Invalid number',
+      providerErrorCode: '21211',
+      problems: ['to is invalid'],
+    });
+  });
+
+  it('shows field errors from message validation as problems', async () => {
+    // Shape returned by the real backend for POST /api/v1/messages.
+    const body = {
+      title: 'Validation failed',
+      status: 400,
+      detail: 'The request has invalid fields.',
+      code: 'VALIDATION_FAILED',
+      errors: [
+        { field: 'body', message: 'must not be blank' },
+        { field: 'to', message: 'must be in E.164 format, for example +910000000001' },
+      ],
+    };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ status: 400, ok: false, text: async () => JSON.stringify(body) }));
+    await expect(request('POST', '/api/v1/messages', {})).rejects.toMatchObject({
+      code: 'VALIDATION_FAILED',
+      problems: ['body: must not be blank', 'to: must be in E.164 format, for example +910000000001'],
+    });
+  });
+
+  it('replaces an HTML error page with a readable message', async () => {
+    const html = '<!doctype html><html><head><title>HTTP Status 500 - Internal Server Error</title></head></html>';
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ status: 500, ok: false, statusText: 'Internal Server Error', text: async () => html }));
+    const error = await request('GET', '/api/v1/providers').catch((e) => e);
+    expect(error).toMatchObject({ status: 500, title: 'Internal Server Error' });
+    expect(error.detail).toMatch(/error page instead of an API response/);
+    expect(error.detail).not.toContain('<');
+  });
+
+  it('reports network failures as NETWORK_ERROR', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
+    await expect(request('GET', '/api/v1/providers')).rejects.toMatchObject({ code: 'NETWORK_ERROR' });
+  });
+
+  it('keeps the full error response on the ApiError for display', async () => {
+    const body = { title: 'Provider rejected the message', status: 502, code: 'PROVIDER_REJECTED', extra: { raw: 1 } };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ status: 502, ok: false, text: async () => JSON.stringify(body) }));
+    await expect(request('POST', '/api/v1/messages', {})).rejects.toMatchObject({ body });
+  });
+
+  it('keeps a non-JSON error body as text, and no body when nothing arrived', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ status: 503, ok: false, statusText: 'Unavailable', text: async () => '<html>down</html>' }));
+    await expect(request('GET', '/api/v1/providers')).rejects.toMatchObject({ body: '<html>down</html>' });
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
+    await expect(request('GET', '/api/v1/providers')).rejects.toMatchObject({ code: 'NETWORK_ERROR', body: null });
+  });
+});
