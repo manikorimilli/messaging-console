@@ -14,8 +14,9 @@ import { BODY_MAX_LENGTH } from '../utils/validation.js';
 import { FormField } from './FormField.jsx';
 
 // Message textarea with a character counter and frontend-only sample templates.
-// The template list depends on the selected provider. Templates only fill the
-// textarea; the final text is sent as `body`.
+// The template list depends on the selected provider (the provider object, or
+// undefined before one is chosen). Templates only fill the textarea; the final
+// text is sent as `body`.
 export function MessageField({ id, provider, value, onChange, onBlur, error, disabled }) {
   const over = value.length > BODY_MAX_LENGTH;
   const templates = templatesForProvider(provider);
@@ -35,7 +36,7 @@ export function MessageField({ id, provider, value, onChange, onBlur, error, dis
       }
       aside={
         <DropdownMenu>
-          <DropdownMenuTrigger asChild disabled={disabled}>
+          <DropdownMenuTrigger asChild disabled={disabled || !provider}>
             <Button type="button" variant="outline" size="sm" className="rounded-full">
               <SparklesIcon aria-hidden="true" />
               {twilio ? 'Twilio template' : 'Template'}

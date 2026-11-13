@@ -2,14 +2,22 @@ import { describe, expect, it } from 'vitest';
 import { GENERAL_TEMPLATES, TWILIO_TEMPLATES, templatesForProvider } from '../data/sampleTemplates.js';
 
 describe('templatesForProvider', () => {
-  it('uses the Twilio test values for Twilio only', () => {
+  it('uses the Twilio test values for any Twilio provider', () => {
     expect(templatesForProvider('TWILIO')).toBe(TWILIO_TEMPLATES);
-    expect(templatesForProvider('twilio')).toBe(TWILIO_TEMPLATES);
+    expect(templatesForProvider('twilio2')).toBe(TWILIO_TEMPLATES);
+    // Registered under any id: recognised by its Twilio address.
+    const myTwilio = { id: 'MY-SMS', request: { url: 'https://api.twilio.com/2010-04-01/Accounts/{{account-sid}}/Messages.json' } };
+    expect(templatesForProvider(myTwilio)).toBe(TWILIO_TEMPLATES);
   });
-  it('keeps the free-text samples for Vonage and other providers', () => {
+  it('keeps the free-text samples for other providers', () => {
     expect(templatesForProvider('VONAGE')).toBe(GENERAL_TEMPLATES);
-    expect(templatesForProvider('MSG91')).toBe(GENERAL_TEMPLATES);
-    expect(templatesForProvider('')).toBe(GENERAL_TEMPLATES);
+    expect(templatesForProvider({ id: 'VONAGE', request: { url: 'https://rest.nexmo.com/sms/json' } })).toBe(GENERAL_TEMPLATES);
+    // A look-alike address is not Twilio.
+    expect(templatesForProvider({ id: 'X', request: { url: 'https://api.twilio.com.evil.test/send' } })).toBe(GENERAL_TEMPLATES);
+  });
+  it('offers nothing until a provider is chosen', () => {
+    expect(templatesForProvider(undefined)).toEqual([]);
+    expect(templatesForProvider('')).toEqual([]);
   });
   it('sends the exact Twilio body values', () => {
     expect(TWILIO_TEMPLATES.map((t) => t.text)).toEqual([

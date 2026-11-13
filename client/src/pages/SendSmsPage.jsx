@@ -144,7 +144,7 @@ export function SendSmsPage() {
 
             <MessageField
               id="send-body"
-              provider={provider}
+              provider={providersState.providers.find((p) => p.id === provider)}
               value={body}
               onChange={setBody}
               onBlur={() => setTouched((t) => ({ ...t, body: true }))}

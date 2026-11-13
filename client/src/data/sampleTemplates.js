@@ -44,10 +44,21 @@ export const GENERAL_TEMPLATES = [
   },
 ];
 
-export function usesTwilioTemplates(providerId) {
-  return providerId?.toUpperCase() === 'TWILIO';
+const TWILIO_API = /^https?:\/\/([\w-]+\.)*twilio\.com(\/|$)/i;
+
+// True for a Twilio provider, whatever id it was registered under: its request
+// goes to twilio.com, or its id starts with TWILIO (e.g. TWILIO, TWILIO2).
+// Accepts a provider object from the list, or just an id.
+export function usesTwilioTemplates(provider) {
+  if (!provider) return false;
+  const id = String(typeof provider === 'string' ? provider : provider.id ?? '').toUpperCase();
+  const url = typeof provider === 'string' ? '' : provider.request?.url ?? '';
+  return TWILIO_API.test(url) || id.startsWith('TWILIO');
 }
 
-export function templatesForProvider(providerId) {
-  return usesTwilioTemplates(providerId) ? TWILIO_TEMPLATES : GENERAL_TEMPLATES;
+// Twilio free-tier accounts only accept these test values; other providers get
+// free-text samples. Nothing until a provider is chosen.
+export function templatesForProvider(provider) {
+  if (!provider) return [];
+  return usesTwilioTemplates(provider) ? TWILIO_TEMPLATES : GENERAL_TEMPLATES;
 }
