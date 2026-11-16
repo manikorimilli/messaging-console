@@ -1,21 +1,14 @@
 # Set up Twilio WhatsApp
 
-Three parts: copy five values from Twilio, register them in the Messaging Console, send a test
-WhatsApp message.
+You need five values from Twilio.
 
-WhatsApp signs in to Twilio the same way as SMS: with an **API key** and its **Client secret**. If
-you already set up SMS, use the same API key here.
-
-| Value | Where you find it in Twilio | Looks like |
-|---|---|---|
-| `account-sid` | Home page, **Account SID** | `AC...` (34 characters) |
-| `api-key` | API key, **SID** | `SK...` (34 characters) |
-| `api-secret` | API key, **Client secret** (shown only once) | 32 characters |
-| `from` | **Try out WhatsApp > Send a message**, **From** | `+15551234567` |
-| `content-sid` | **Try out WhatsApp > Send a message > API**, `ContentSid=` | `HX...` (34 characters) |
-
-Keep `api-key` and `api-secret` private: anyone who has them can send messages on your account.
-`content-sid` is not a secret. It only names the message template to send.
+| Value | Where in Twilio |
+|---|---|
+| `account-sid` | Home page > **Account SID** |
+| `api-key` | API key > **SID** |
+| `api-secret` | API key > **Client secret** (shown only once) |
+| `from` | Try out WhatsApp > **From** |
+| `content-sid` | Try out WhatsApp > **API** tab > `ContentSid` |
 
 ## Part 1: Get your values from Twilio
 
@@ -29,24 +22,21 @@ On the **Home** page, copy the **Account SID** (`account-sid`) with the copy ico
 
 ### Step 2. Get an API key and its Client secret
 
-**Already set up SMS?** Use the same API key: its **SID** is your `api-key` and its **Client
-secret** is your `api-secret`. Go to Step 3.
-
-Otherwise, on the Home page click **API keys & auth tokens**, then **Create API key**. Enter any
+On the Home page click **API keys & auth tokens**, then **Create API key**. Enter any
 name (for example `messaging-console`), set **Key type** to **Main**, and click **Next**.
 
-![Create API key: name and key type Main](../sms/images/03-create-api-key.png)
+![Create API key: name and key type Main](images/02a-create-api-key.png)
 
 Copy both values now. **The Client secret is shown only once.**
 
 - **SID** is your `api-key`
 - **Client secret** is your `api-secret`
 
-![Copy secret page with the SID and the Client secret](../sms/images/04-copy-secret.png)
+![Copy secret page with the SID and the Client secret](images/02b-copy-secret.png)
 
 ### Step 3. Connect your phone to the WhatsApp test environment
 
-On the same page, under **Try it out**, open **Send a WhatsApp message**.
+Go back to **Home**. Under **Try it out**, open **Send a WhatsApp message**.
 
 1. **Select your tester:** choose your own phone number.
 2. **Link your device:** open WhatsApp on that phone and send the code shown (for example
@@ -85,18 +75,13 @@ changes.
 Open **http://localhost:5173**, go to **Providers** and click **Register provider**. Open
 [twilio-whatsapp.json](twilio-whatsapp.json), copy all of it, and paste it into the box.
 
-![Register provider with the WhatsApp template pasted](images/05-register-paste.png)
-
 Five boxes appear below it: `account-sid`, `api-key`, `api-secret`, `from` and `content-sid`.
 
-![Register provider form with the empty boxes](images/06-register-empty.png)
+![Register provider with the WhatsApp template pasted and its five boxes](images/06-register-empty.png)
 
 ### Step 7. Fill in your values and register
 
-Paste the five values from Part 1. Click **Validate**. When it says **Configuration looks valid**,
-click **Register provider**.
-
-![Register provider form with the values filled in](images/07-register-filled.png)
+Paste each value into its box. Click **Validate**, then **Register provider**.
 
 The provider now shows in the list as **TWILIO_WHATSAPP**, channel **WHATSAPP**, **Enabled**.
 

@@ -10,8 +10,6 @@ git clone https://github.com/manikorimilli/messaging-console.git
 cd messaging-console
 ```
 
-Or on GitHub click **Code > Download ZIP** and unzip it.
-
 ## Run Messaging Console locally: Windows
 
 Open a cmd terminal and go to the repository root folder, then:
