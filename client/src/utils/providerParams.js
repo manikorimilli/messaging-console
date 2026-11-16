@@ -1,3 +1,5 @@
+import { MASKED_VALUE } from './providerConfig.js';
+
 // Parameters are the {name} or {{name}} placeholders inside a provider config.
 // "${NAME}" environment placeholders are not parameters and are skipped.
 const PLACEHOLDER = /(?<!\$)\{\{\s*([\w.-]+)\s*\}\}|(?<![${])\{([\w.-]+)\}(?!\})/g;
@@ -129,11 +131,14 @@ export const parameterValue = (name, values) => values[name] ?? '';
 export const hasPlaceholder = (text) => typeof text === 'string' && new RegExp(PLACEHOLDER.source).test(text);
 
 // The problem with each parameter box, keyed by name: empty, or still a placeholder.
-export function parameterErrors(names, values) {
+// Names in "kept" may stay empty: the server already holds their value.
+export function parameterErrors(names, values, kept = new Set()) {
   const errors = {};
   for (const name of names) {
     const value = parameterValue(name, values).trim();
-    if (!value) errors[name] = 'Enter a value';
+    if (!value) {
+      if (!kept.has(name)) errors[name] = 'Enter a value';
+    }
     else if (hasPlaceholder(value)) errors[name] = 'Enter the real value, not a placeholder';
   }
   return errors;
@@ -146,4 +151,23 @@ export function withParameterValues(cfg, values) {
   if (!isObject(cfg) || entered.length === 0) return cfg;
   const variables = isObject(cfg.variables) ? cfg.variables : {};
   return { ...cfg, variables: { ...variables, ...Object.fromEntries(entered) } };
+}
+
+// Editing a provider: the server returns stored secrets as "****". Those boxes
+// start empty and may stay empty, which keeps the stored value.
+export function keptParameters(cfg) {
+  const variables = isObject(cfg) && isObject(cfg.variables) ? cfg.variables : {};
+  return new Set(Object.keys(variables).filter((name) => variables[name] === MASKED_VALUE));
+}
+
+// Editing a provider: each box starts with the value saved in "variables" when it
+// is shown in plain text. Masked, empty and placeholder values start empty.
+export function initialParameterValues(cfg) {
+  const variables = isObject(cfg) && isObject(cfg.variables) ? cfg.variables : {};
+  const values = {};
+  for (const name of detectParameters(cfg).provider) {
+    const value = variables[name];
+    if (typeof value === 'string' && value && value !== MASKED_VALUE && !hasPlaceholder(value)) values[name] = value;
+  }
+  return values;
 }

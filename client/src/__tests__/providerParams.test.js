@@ -8,6 +8,8 @@ import {
   detectParameters,
   isSendTimeParameter,
   hasPlaceholder,
+  initialParameterValues,
+  keptParameters,
   parameterErrors,
   parameterValue,
   placeholderProblems,
@@ -194,5 +196,58 @@ describe('uaap parameters', () => {
       '{from} has no value. Add "from" to variables.',
     ]);
     expect(validateProviderConfig(cfg, { requireVariables: false }).problems).toEqual([]);
+  });
+});
+
+describe('edit flow with parameters', () => {
+  beforeEach(() => {
+    mock.setMockLatency(0);
+    mock.resetMockStore();
+  });
+
+  const cfg = {
+    id: 'demo',
+    'display-name': 'Demo',
+    channel: 'SMS',
+    variables: { account: 'A1', token: 'old-token', sender: 'DEMO' },
+    request: {
+      method: 'POST',
+      url: 'https://api.example.com/{{account}}/send',
+      auth: { type: 'bearer', token: '{{token}}' },
+      body: { format: 'json', fields: { from: '{{sender}}', to: '{{to}}', text: '{{text}}' } },
+    },
+    response: { 'id-path': '$.id' },
+  };
+
+  it('starts boxes with visible saved values and leaves masked ones empty', async () => {
+    await mock.registerProvider(cfg);
+    const saved = await mock.getProvider('DEMO');
+    expect(initialParameterValues(saved)).toEqual({ account: 'A1', sender: 'DEMO' });
+    expect([...keptParameters(saved)]).toEqual(['token']);
+  });
+
+  it('lets a masked box stay empty, but not one with no saved value', () => {
+    const kept = new Set(['token']);
+    expect(parameterErrors(['account', 'token'], { account: 'A1' }, kept)).toEqual({});
+    expect(parameterErrors(['account', 'token'], {}, kept)).toEqual({ account: 'Enter a value' });
+    expect(parameterErrors(['token'], { token: '{{token}}' }, kept)).toEqual({ token: 'Enter the real value, not a placeholder' });
+  });
+
+  it('keeps the stored secret when its box is empty and replaces it when typed', async () => {
+    await mock.registerProvider(cfg);
+    const saved = await mock.getProvider('DEMO');
+
+    // Change only the sender; the token box stays empty.
+    const kept = withParameterValues(saved, { ...initialParameterValues(saved), sender: 'NEW' });
+    expect(validateProviderConfig(kept, { mode: 'update', pathId: 'DEMO', requireVariables: false }).problems).toEqual([]);
+    await mock.updateProvider('DEMO', kept);
+    let after = await mock.getProvider('DEMO');
+    expect(after.variables).toEqual({ account: 'A1', token: '****', sender: 'NEW' });
+
+    // Type a new token: it replaces the stored one.
+    await mock.updateProvider('DEMO', withParameterValues(after, { token: 'new-token' }));
+    after = await mock.getProvider('DEMO');
+    expect(after.variables.token).toBe('****');
+    await expect(mock.updateProvider('DEMO', withParameterValues(after, {}))).resolves.toBeTruthy();
   });
 });

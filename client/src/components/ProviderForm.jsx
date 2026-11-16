@@ -9,6 +9,8 @@ import { useAsyncAction } from '../hooks/useAsyncAction.js';
 import { MASKED_VALUE, PROVIDER_EXAMPLE } from '../utils/providerConfig.js';
 import {
   detectParameters,
+  initialParameterValues,
+  keptParameters,
   parameterErrors,
   parameterValue,
   withParameterValues,
@@ -21,9 +23,10 @@ import { Notice } from './Notice.jsx';
 
 const MAX_FILE_BYTES = 256 * 1024;
 
-// One plain text box per placeholder found in the JSON. Boxes start empty and
-// show exactly what is typed: no masking, and nothing copied from the JSON.
-function ParameterFields({ formId, parameters, values, errors, onChange, disabled }) {
+// One plain text box per placeholder found in the JSON. When registering, boxes
+// start empty and show exactly what is typed. When editing, a box whose value the
+// server keeps hidden ("****") starts empty and may stay empty to keep it.
+function ParameterFields({ formId, parameters, values, errors, kept, editing, onChange, disabled }) {
   if (parameters.provider.length === 0) {
     return (
       <p className="text-muted-foreground text-sm">
@@ -40,6 +43,7 @@ function ParameterFields({ formId, parameters, values, errors, onChange, disable
         <p className="text-muted-foreground text-xs">
           Found from the <code className="text-foreground">{'{...}'}</code> placeholders above. Values are saved in{' '}
           <code className="text-foreground">variables</code>.
+          {editing && ' Leave a saved box empty to keep its value, or type a new one to replace it.'}
         </p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -52,7 +56,7 @@ function ParameterFields({ formId, parameters, values, errors, onChange, disable
                 id={id}
                 className={controlClass}
                 value={parameterValue(name, values)}
-                placeholder={`Enter ${name}`}
+                placeholder={kept.has(name) ? 'Saved. Leave empty to keep it' : `Enter ${name}`}
                 aria-invalid={Boolean(error) || undefined}
                 aria-describedby={error ? `${id}-error` : undefined}
                 onChange={(e) => onChange(name, e.target.value)}
@@ -76,14 +80,17 @@ export function ProviderForm({ mode, providerId, initialText = '', onSubmit, onC
   const resultsRef = useRef(null);
   const [text, setText] = useState(initialText);
   const [check, setCheck] = useState(null);
-  const [paramValues, setParamValues] = useState({});
+  // Editing starts each box with the value shown in the saved configuration.
+  const [paramValues, setParamValues] = useState(() => (mode === 'update' ? initialParameterValues(parseJson(initialText).value) : {}));
   const submit = useAsyncAction(onSubmit);
 
-  // Parameter boxes are part of registering only. They follow the JSON as it is
-  // typed and disappear while it does not parse.
-  const showParameters = mode === 'create';
+  // Parameter boxes show when registering and when editing. They follow the JSON
+  // as it is typed and disappear while it does not parse.
+  const showParameters = mode === 'create' || mode === 'update';
+  const editing = mode === 'update';
   const draft = useMemo(() => (showParameters ? parseJson(text).value : undefined), [showParameters, text]);
   const parameters = useMemo(() => detectParameters(draft), [draft]);
+  const kept = useMemo(() => (editing ? keptParameters(draft) : new Set()), [editing, draft]);
 
   function withEnteredParameters(cfg) {
     if (!showParameters) return cfg;
@@ -103,7 +110,7 @@ export function ProviderForm({ mode, providerId, initialText = '', onSubmit, onC
     }
     const cfg = withEnteredParameters(parsed.value);
     const result = validateProviderConfig(cfg, { mode, pathId: providerId, requireVariables: !showParameters });
-    const paramErrors = showParameters ? parameterErrors(parameters.provider, paramValues) : {};
+    const paramErrors = showParameters ? parameterErrors(parameters.provider, paramValues, kept) : {};
     // A box replaces its "variables" value, so a placeholder left there is not a
     // problem of its own: the box's message already covers it.
     const coveredByBox = new Set(parameters.provider.map((name) => `variables.${name} is a placeholder. Enter the real value.`));
@@ -132,7 +139,7 @@ export function ProviderForm({ mode, providerId, initialText = '', onSubmit, onC
     if (submit.pending) return;
     // Registering is two steps: Validate, then Save. Save stays disabled until
     // a check passes, and it sends the config that check approved.
-    if (showParameters) {
+    if (mode === 'create') {
       if (check?.cfg) await submit.run(check.cfg);
       else validate();
       return;
@@ -158,15 +165,15 @@ export function ProviderForm({ mode, providerId, initialText = '', onSubmit, onC
   }
 
   const isValid = check && !check.parseError && check.problems.length === 0;
-  const saveLocked = showParameters && !isValid;
+  const saveLocked = mode === 'create' && !isValid;
 
   return (
     <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col" noValidate>
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 pb-4">
         {mode === 'update' ? (
           <Notice tone="info" title="Secrets stay masked" role="note">
-            Secret values show as <code className="text-foreground">{MASKED_VALUE}</code>. Leave them as they are to keep the
-            stored secret, or replace one with a new raw value to change it. Updates send the full configuration.
+            Saved secrets show as <code className="text-foreground">{MASKED_VALUE}</code> and their boxes below start empty.
+            Leave a box empty to keep the saved value, or type a new one to replace it. Updates send the full configuration.
           </Notice>
         ) : (
           <p className="text-muted-foreground text-sm">
@@ -226,6 +233,8 @@ export function ProviderForm({ mode, providerId, initialText = '', onSubmit, onC
             parameters={parameters}
             values={paramValues}
             errors={check?.paramErrors ?? {}}
+            kept={kept}
+            editing={editing}
             onChange={handleParameter}
             disabled={submit.pending}
           />
