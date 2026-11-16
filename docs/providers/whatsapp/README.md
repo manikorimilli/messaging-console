@@ -1,85 +1,113 @@
-# Register Twilio WhatsApp
+# Set up Twilio WhatsApp
 
-Template: [twilio-whatsapp.json](twilio-whatsapp.json)
+Three parts: copy four values from Twilio, register them in the Messaging Console, send a test
+WhatsApp message.
 
-This sends an **approved WhatsApp template** (WhatsApp only lets a business start a conversation
-with one). You need four values from your Twilio account. Then you paste the template into the
-Messaging Console and fill them in.
+| Value | Where you find it in Twilio | Looks like |
+|---|---|---|
+| `account-sid` | Home page, **Account SID** | `AC...` (34 characters) |
+| `auth-token` | Home page, **Auth Token** | 32 characters |
+| `from` | **Try out WhatsApp > Send a message**, **From** | `+15551234567` |
+| `content-sid` | **Try out WhatsApp > Send a message > API**, `ContentSid=` | `HX...` (34 characters) |
 
-## 1. Get your values from Twilio
+Keep these values private. Anyone who has them can send messages on your account.
+
+## Part 1: Get your values from Twilio
 
 Sign in at **https://console.twilio.com**.
 
-> Twilio sometimes moves menus. If a menu name doesn't match, type it into the **search bar** at
-> the top of the Console.
+### Step 1. Copy the Account SID and Auth Token
 
-### Account SID and Auth Token
+On the **Home** page, copy the **Account SID** (`account-sid`) and the **Auth Token**
+(`auth-token`) with the copy icon next to each.
 
-On the Console home page, scroll down to the **Account Info** box. Click **Show** next to the
-Auth Token.
+![Twilio home page: Account SID and Auth Token](images/01-home-account-info.png)
 
-![Account Info box with the Auth Token shown](images/01-account-info.png)
+### Step 2. Connect your phone to the WhatsApp test environment
 
-| Box in the app | Where in Twilio | Looks like |
-|---|---|---|
-| `account-sid` | **Account SID** | `AC` + 32 letters and numbers |
-| `auth-token` | **Auth Token** | 32 letters and numbers |
+On the same page, under **Try it out**, open **Send a WhatsApp message**.
 
-### WhatsApp sender number
+1. **Select your tester:** choose your own phone number.
+2. **Link your device:** open WhatsApp on that phone and send the code shown (for example
+   `join twilio-trial`) to the number shown. Or scan the QR code.
 
-Open **Messaging > Senders > WhatsApp senders** and copy your sender number.
+This is needed once per phone on a Twilio trial. Only phones that did it can receive your
+messages.
 
-![WhatsApp senders page](images/02-whatsapp-senders.png)
+![Try out WhatsApp: connect to the testing environment](images/02-connect-sandbox.png)
 
-| Box in the app | Where in Twilio | Looks like |
-|---|---|---|
-| `from` | The WhatsApp sender number | `+15551234567` |
+### Step 3. Copy the From number
 
-Write it with `+` and the country code. Don't add `whatsapp:`; the app adds it.
+After your phone is connected, the **Send a message** tab opens. The **From** number is your
+`from`. Copy it with the `+` and the country code, no spaces. Don't add `whatsapp:`; the app adds
+it.
 
-### Template ID
+Under **Template**, choose the message you want to send (for example **Appointment Reminders**).
 
-1. Open **Messaging > Content Template Builder**.
-2. Find your template. Its **SID** is in the first column.
-3. Check that its WhatsApp status is **Approved**. A new template needs WhatsApp approval first,
-   which usually takes from a few minutes up to one day.
+![Send a message tab with the From number and the template](images/03-from-number.png)
 
-![Content Template Builder with an approved template](images/03-content-template-builder.png)
+### Step 4. Copy the ContentSid
 
-| Box in the app | Where in Twilio | Looks like |
-|---|---|---|
-| `content-sid` | Template **SID** | `HX` + 32 letters and numbers |
+Click the **API** tab on the right. In the request, find `ContentSid=` and copy the value after it
+(starts with `HX`, highlighted below). This is your `content-sid`.
 
-## 2. Register the provider in the Messaging Console
+The `ContentSid` belongs to the template you chose in Step 3. Choose another template and it
+changes.
 
-1. Open http://localhost:5173, go to **Providers** and click **Register provider**.
+![API tab with the ContentSid highlighted](images/04-content-sid.png)
 
-   ![Providers page with the Register provider button](images/04-providers-page.png)
+## Part 2: Register the provider in the Messaging Console
 
-2. Paste the whole content of [twilio-whatsapp.json](twilio-whatsapp.json).
-3. Fill in the four boxes that appear: `account-sid`, `auth-token`, `from`, `content-sid`.
+### Step 5. Paste the template
 
-   ![Register provider form with the four boxes filled in](images/05-register-form.png)
+Open **http://localhost:5173**, go to **Providers** and click **Register provider**. Open
+[twilio-whatsapp.json](twilio-whatsapp.json), copy all of it, and paste it into the box.
 
-4. Click **Validate**, then **Register provider**.
+![Register provider with the WhatsApp template pasted](images/05-register-paste.png)
 
-## 3. Send a test WhatsApp message
+Four boxes appear below it: `account-sid`, `auth-token`, `from` and `content-sid`.
 
-Open **Send Message**, choose **TWILIO_WHATSAPP (WHATSAPP)** and enter the phone number with
-country code (e.g. `+919876543210`). No message text is needed: the approved template's text is
-sent. Click **Send Message**.
+![Register provider form with the four empty boxes](images/06-register-empty.png)
 
-![Send Message page with an accepted result](images/06-send-message.png)
+### Step 6. Fill in your values and register
 
-A green **Accepted by provider** card means Twilio took the message.
+Paste the four values from Part 1. Click **Validate**. When it says **Configuration looks valid**,
+click **Register provider**.
+
+![Register provider form with the four values filled in](images/07-register-filled.png)
+
+The provider now shows in the list as **TWILIO_WHATSAPP**, channel **WHATSAPP**, **Enabled**.
+
+![Providers list with TWILIO_WHATSAPP enabled](images/08-provider-registered.png)
+
+## Part 3: Send a test WhatsApp message
+
+### Step 7. Send
+
+Open **Send Message**:
+
+1. **Provider:** choose **TWILIO_WHATSAPP (WHATSAPP)**.
+
+   ![Provider list with TWILIO_WHATSAPP](images/09-choose-provider.png)
+
+2. **Recipient phone number:** the phone you connected in Step 2, with `+` and the country code,
+   e.g. `+919876543210`.
+3. **Message:** nothing to type. The template's own text is sent.
+4. Click **Send Message**.
+
+![Send Message page filled in for WhatsApp](images/10-send-message.png)
+
+A green **Accepted by provider** card means Twilio took the message. It arrives in WhatsApp on that
+phone.
+
+![Accepted by provider result](images/11-message-accepted.png)
 
 ## If something goes wrong
 
 | You see | Do this |
 |---|---|
-| `Authentication Error` | `account-sid` or `auth-token` was copied wrong. On **Providers**, click **...** next to the provider, choose **Edit**, and paste it again. |
-| WhatsApp error `63007` | `from` is not a WhatsApp sender on your account. |
-| WhatsApp error `63015` | Twilio sandbox only: the recipient must first send your sandbox's `join <code>` message. |
-| Template error | Check that the template's WhatsApp status is **Approved** and `content-sid` starts with `HX`. |
-
-Keep these values private. Anyone who has them can send messages on your account.
+| `Authentication Error` | `account-sid` or `auth-token` was copied wrong. On **Providers**, click **...** next to TWILIO_WHATSAPP, choose **Edit**, and paste them again. |
+| WhatsApp error `63015` | The recipient's phone is not connected. Do Step 2 again from that phone. |
+| WhatsApp error `63007` | `from` is not your WhatsApp number in Twilio. Copy it again from Step 3. |
+| Accepted, but nothing arrives | Check `content-sid` is the one from Step 4, and the recipient is the phone from Step 2. |
+| Want a different message | Choose another template in Step 3, copy its new `ContentSid` (Step 4), and edit the provider. |
