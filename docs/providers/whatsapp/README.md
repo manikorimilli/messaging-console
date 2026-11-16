@@ -1,21 +1,16 @@
 # Set up Twilio WhatsApp
 
-Three parts: copy five values from Twilio, register them in the Messaging Console, send a test
-WhatsApp message.
+You need five values from Twilio. Already set up SMS? Use the same API key here.
 
-WhatsApp signs in to Twilio the same way as SMS: with an **API key** and its **Client secret**. If
-you already set up SMS, use the same API key here.
+| Value | Where in Twilio |
+|---|---|
+| `account-sid` | Home page > **Account SID** |
+| `api-key` | API key > **SID** |
+| `api-secret` | API key > **Client secret** (shown only once) |
+| `from` | Try out WhatsApp > **From** |
+| `content-sid` | Try out WhatsApp > **API** tab > `ContentSid` |
 
-| Value | Where you find it in Twilio | Looks like |
-|---|---|---|
-| `account-sid` | Home page, **Account SID** | `AC...` (34 characters) |
-| `api-key` | API key, **SID** | `SK...` (34 characters) |
-| `api-secret` | API key, **Client secret** (shown only once) | 32 characters |
-| `from` | **Try out WhatsApp > Send a message**, **From** | `+15551234567` |
-| `content-sid` | **Try out WhatsApp > Send a message > API**, `ContentSid=` | `HX...` (34 characters) |
-
-Keep `api-key` and `api-secret` private: anyone who has them can send messages on your account.
-`content-sid` is not a secret. It only names the message template to send.
+Keep `api-key` and `api-secret` private. `content-sid` is not a secret.
 
 ## Part 1: Get your values from Twilio
 
@@ -91,16 +86,7 @@ Five boxes appear below it: `account-sid`, `api-key`, `api-secret`, `from` and `
 
 ### Step 7. Fill in your values and register
 
-Paste the five values from Part 1 into their boxes:
-
-| Box | Value from |
-|---|---|
-| `account-sid` | Step 1 |
-| `api-key`, `api-secret` | Step 2 (the API key's SID and Client secret) |
-| `from` | Step 4 |
-| `content-sid` | Step 5 |
-
-Click **Validate**. When it says **Configuration looks valid**, click **Register provider**.
+Paste each value into its box. Click **Validate**, then **Register provider**.
 
 The provider now shows in the list as **TWILIO_WHATSAPP**, channel **WHATSAPP**, **Enabled**.
 
