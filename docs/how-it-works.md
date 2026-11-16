@@ -19,7 +19,7 @@ each provider (Twilio, Vonage, ...) is a JSON definition registered through the 
 
 ## A provider definition
 
-Ready-to-fill examples: `docs/providers/twilio-sms.json` and `docs/providers/twilio-whatsapp.json`.
+Ready-to-fill examples: `docs/providers/sms/twilio-sms.json` and `docs/providers/whatsapp/twilio-whatsapp.json`.
 
 | Field | Meaning |
 |---|---|
@@ -50,7 +50,7 @@ Register a `WHATSAPP` provider the same way as an `SMS` one. WhatsApp numbers ca
 `whatsapp:` scheme on the wire; add it in the field templates, not in `variables`.
 
 WhatsApp only lets a business start a conversation with an approved **template**. Twilio sends
-one by its id, `ContentSid` (`HX...`), fixed per provider. `docs/providers/twilio-whatsapp.json`
+one by its id, `ContentSid` (`HX...`), fixed per provider. `docs/providers/whatsapp/twilio-whatsapp.json`
 does this:
 
 ```json

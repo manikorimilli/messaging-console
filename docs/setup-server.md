@@ -118,7 +118,7 @@ Copy one, fill in the empty `variables` values with the keys you received, and r
 **macOS / Linux**
 
 ```bash
-cp ../docs/providers/twilio-sms.json my-twilio.json
+cp ../docs/providers/sms/twilio-sms.json my-twilio.json
 # edit my-twilio.json: fill in account-sid, api-key, api-secret and from
 curl -i -X POST http://localhost:8080/api/v1/providers \
   -H "Content-Type: application/json" -d @my-twilio.json
@@ -161,7 +161,7 @@ curl -i -X POST http://localhost:8080/api/v1/messages \
 
 ### 7. Send a test WhatsApp message
 
-Copy `docs/providers/twilio-whatsapp.json`, fill in `account-sid`, `auth-token`, `from` (your
+Copy `docs/providers/whatsapp/twilio-whatsapp.json`, fill in `account-sid`, `auth-token`, `from` (your
 WhatsApp sender number) and `content-sid` (your approved template's id, `HX...`), and register it
 the same way as in step 5.
 
