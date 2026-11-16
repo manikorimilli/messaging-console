@@ -96,12 +96,3 @@ Open **Send Message**:
 A green **Accepted by provider** card means Twilio took the message.
 
 ![Accepted by provider result](images/11-message-accepted.png)
-
-## If something goes wrong
-
-| You see | Do this |
-|---|---|
-| `Authentication Error` | `api-key` or `api-secret` was copied wrong. On **Providers**, click **...** next to TWILIO, choose **Edit**, and paste them again. Lost the secret? Create a new API key (Step 2). |
-| Twilio error `21608` | A trial account only sends to phone numbers verified in your Twilio Console. |
-| Twilio error `21211` | The recipient number is not valid. Use `+`, the country code and the number, no spaces. |
-| Message rejected on a trial | Pick a message from **Twilio template** instead of typing your own. |

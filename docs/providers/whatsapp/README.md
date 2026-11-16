@@ -101,13 +101,3 @@ A green **Accepted by provider** card means Twilio took the message. It arrives 
 phone.
 
 ![Accepted by provider result](images/11-message-accepted.png)
-
-## If something goes wrong
-
-| You see | Do this |
-|---|---|
-| `Authentication Error` | `account-sid` or `auth-token` was copied wrong. On **Providers**, click **...** next to TWILIO_WHATSAPP, choose **Edit**, and paste them again. |
-| WhatsApp error `63015` | The recipient's phone is not connected. Do Step 2 again from that phone. |
-| WhatsApp error `63007` | `from` is not your WhatsApp number in Twilio. Copy it again from Step 3. |
-| Accepted, but nothing arrives | Check `content-sid` is the one from Step 4, and the recipient is the phone from Step 2. |
-| Want a different message | Choose another template in Step 3, copy its new `ContentSid` (Step 4), and edit the provider. |
