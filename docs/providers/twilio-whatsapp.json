@@ -8,6 +8,10 @@
     "auth-token": "",
     "from": "+14155238886"
   },
+  "system-variables": {
+    "uaap.to": "",
+    "uaap.text": ""
+  },
   "request": {
     "method": "POST",
     "url": "https://api.twilio.com/2010-04-01/Accounts/{{account-sid}}/Messages.json",
@@ -19,29 +23,17 @@
     "body": {
       "format": "form",
       "fields": {
-        "To": "whatsapp:{{to}}",
+        "To": "whatsapp:{{uaap.to}}",
         "From": "whatsapp:{{from}}",
-        "Body": "{{text}}"
+        "Body": "{{uaap.text}}"
       }
     }
   },
   "response": {
-    "success": {
-      "http-status": [
-        "2xx"
-      ]
-    },
+    "success": { "http-status": ["2xx"] },
     "id-path": "$.sid",
     "status-path": "$.status",
-    "error": {
-      "code-path": "$.code",
-      "message-path": "$.message"
-    },
-    "retry": {
-      "http-status": [
-        "429",
-        "5xx"
-      ]
-    }
+    "error": { "code-path": "$.code", "message-path": "$.message" },
+    "retry": { "http-status": ["429", "5xx"] }
   }
 }

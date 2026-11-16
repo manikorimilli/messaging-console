@@ -1,48 +1,39 @@
 {
-  "id": "TWILIO",
-  "display-name": "Twilio",
+  "id": "TWILIO_SMS",
+  "display-name": "Twilio SMS",
   "channel": "SMS",
   "enabled": true,
   "variables": {
     "account-sid": "",
-    "api-key": "",
-    "api-secret": "",
+    "auth-token": "",
     "from": ""
+  },
+  "system-variables": {
+    "uaap.to": "",
+    "uaap.text": ""
   },
   "request": {
     "method": "POST",
     "url": "https://api.twilio.com/2010-04-01/Accounts/{{account-sid}}/Messages.json",
     "auth": {
       "type": "basic",
-      "username": "{{api-key}}",
-      "password": "{{api-secret}}"
+      "username": "{{account-sid}}",
+      "password": "{{auth-token}}"
     },
     "body": {
       "format": "form",
       "fields": {
-        "To": "{{to}}",
+        "To": "{{uaap.to}}",
         "From": "{{from}}",
-        "Body": "{{text}}"
+        "Body": "{{uaap.text}}"
       }
     }
   },
   "response": {
-    "success": {
-      "http-status": [
-        "2xx"
-      ]
-    },
+    "success": { "http-status": ["2xx"] },
     "id-path": "$.sid",
     "status-path": "$.status",
-    "error": {
-      "code-path": "$.code",
-      "message-path": "$.message"
-    },
-    "retry": {
-      "http-status": [
-        "429",
-        "5xx"
-      ]
-    }
+    "error": { "code-path": "$.code", "message-path": "$.message" },
+    "retry": { "http-status": ["429", "5xx"] }
   }
 }

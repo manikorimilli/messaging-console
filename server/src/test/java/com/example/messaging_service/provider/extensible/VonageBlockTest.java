@@ -30,7 +30,7 @@ import com.example.messaging_service.provider.OutboundMessage;
 import com.example.messaging_service.provider.ProviderResult;
 
 /**
- * The Vonage provider from docs/providers/vonage.json must behave exactly like the former
+ * The Vonage provider from src/test/resources/providers/vonage.json must behave exactly like the former
  * VonageSmsProvider,
  * including its quirks: no "+", type=unicode, and HTTP 200 replies that still mean failure.
  */

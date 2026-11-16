@@ -161,7 +161,7 @@ http://localhost:5173
 The bottom of the sidebar shows **Mock mode** or a green **Live** badge, matching your choice in step 5.
 
 In mock mode the app starts with no providers: on **Providers**, click **Register provider**, paste
-`docs/providers/twilio.json` and fill the boxes with any made-up values. Then send a test SMS: open
+`docs/providers/twilio-sms.json` and fill the boxes with any made-up values. Then send a test SMS: open
 **Send Message**, choose the provider, enter a number in international format (for example
 `+910000000001`), pick a message from the template menu, and click **Send Message**. A green
 **Accepted by provider** card means it worked.

@@ -112,14 +112,14 @@ http://localhost:8080/swagger-ui.html
 
 ### 5. Register a provider
 
-The app starts with no providers. Ready-made files for Twilio and Vonage are in `docs/providers/` at the top of the repository.
+The app starts with no providers. Ready-made files for Twilio SMS and Twilio WhatsApp are in `docs/providers/` at the top of the repository.
 Copy one, fill in the empty `variables` values with the keys you received, and register it.
 
 **macOS / Linux**
 
 ```bash
-cp ../docs/providers/twilio.json my-twilio.json
-# edit my-twilio.json: fill in account-sid, api-key, api-secret and from
+cp ../docs/providers/twilio-sms.json my-twilio.json
+# edit my-twilio.json: fill in account-sid, auth-token and from
 curl -i -X POST http://localhost:8080/api/v1/providers \
   -H "Content-Type: application/json" -d @my-twilio.json
 ```

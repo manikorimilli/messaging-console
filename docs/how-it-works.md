@@ -19,8 +19,7 @@ each provider (Twilio, Vonage, ...) is a JSON definition registered through the 
 
 ## A provider definition
 
-Ready-to-fill examples: `docs/providers/twilio.json`, `docs/providers/vonage.json`,
-`docs/providers/twilio-whatsapp.json` and `docs/providers/twilio-whatsapp-template.json`.
+Ready-to-fill examples: `docs/providers/twilio-sms.json` and `docs/providers/twilio-whatsapp.json`.
 
 | Field | Meaning |
 |---|---|
@@ -51,7 +50,7 @@ Register a `WHATSAPP` provider the same way as an `SMS` one. WhatsApp numbers ca
 `whatsapp:` scheme on the wire; add it in the field templates, not in `variables`:
 
 ```json
-"fields": { "To": "whatsapp:{{to}}", "From": "whatsapp:{{from}}", "Body": "{{text}}" }
+"fields": { "To": "whatsapp:{{uaap.to}}", "From": "whatsapp:{{from}}", "Body": "{{uaap.text}}" }
 ```
 
 This sends free text and only reaches a recipient within 24 hours of their last message to
@@ -59,8 +58,9 @@ you (WhatsApp's "session" window; see `docs/providers/twilio-whatsapp.json`). Ou
 window, or to start a conversation, WhatsApp requires an approved **template**. Twilio sends
 these as `ContentSid` (fixed per approved template) and `ContentVariables` (the template's
 values as one JSON object, e.g. `{"1":"12/1","2":"3pm"}`). Register one provider per template,
-with the template's id in `variables`, and send the `ContentVariables` JSON as the message
-`body`; see `docs/providers/twilio-whatsapp-template.json`.
+with the template's id in `variables` (as `content-sid`), use `"ContentSid": "{{content-sid}}"`
+and `"ContentVariables": "{{uaap.text}}"` in place of `Body`, and send the `ContentVariables`
+JSON as the message `body`.
 
 ## Sending one message
 
