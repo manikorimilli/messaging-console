@@ -5,16 +5,32 @@ Send SMS and WhatsApp messages through your Twilio account, from a simple web pa
 Works on **macOS** and **Linux**. On Windows, use [WSL](https://learn.microsoft.com/windows/wsl/install)
 (Ubuntu) and run everything inside it.
 
-## 1. Set up (once)
+## 1. Get the code
+
+Open a terminal and run:
+
+```bash
+git clone https://github.com/manikorimilli/messaging-console.git
+```
+
+```bash
+cd messaging-console
+```
+
+No `git`? Install it first: on Ubuntu `sudo apt install -y git`, on macOS run `git --version`
+and click **Install**.
+
+## 2. Set up (once)
 
 ```bash
 ./init.sh
 ```
 
-This installs Java 21 and Node.js 22 if you don't have them, then downloads everything else.
-It may ask for your computer password. Takes about 2 to 4 minutes the first time.
+This downloads everything the app needs, including Java and Node.js if your computer doesn't have
+them. They go into this folder only; nothing is installed on your system and no password is
+needed. Takes about 2 to 4 minutes the first time.
 
-## 2. Start
+## 3. Start
 
 ```bash
 ./run.sh
@@ -24,7 +40,7 @@ When you see **Ready**, open **http://localhost:5173**.
 
 Press `Ctrl + C` to stop.
 
-## 3. Add your Twilio account
+## 4. Add your Twilio account
 
 1. Open **Providers** and click **Register provider**.
 2. Paste the content of one of these files:
@@ -42,7 +58,7 @@ Press `Ctrl + C` to stop.
 
 4. Click **Validate**, then **Register provider**.
 
-## 4. Send a message
+## 5. Send a message
 
 Open **Send Message**, choose the provider, enter the phone number with country code
 (e.g. `+919876543210`), type the message, and click **Send Message**. For WhatsApp no message

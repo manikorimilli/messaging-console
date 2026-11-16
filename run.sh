@@ -6,6 +6,8 @@
 #   SERVER_PORT=9090 CLIENT_PORT=3000 ./run.sh    (other ports)
 set -euo pipefail
 cd "$(dirname "$0")"
+# shellcheck source=scripts/tools-env.sh
+. scripts/tools-env.sh
 
 SERVER_PORT=${SERVER_PORT:-8080}
 CLIENT_PORT=${CLIENT_PORT:-5173}
