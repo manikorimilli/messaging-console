@@ -10,10 +10,26 @@
 
   $repo = 'manikorimilli/messaging-console'
   $branch = if ($env:MESSAGING_CONSOLE_BRANCH) { $env:MESSAGING_CONSOLE_BRANCH } else { 'main' }
-  $dir = Join-Path (Get-Location) 'messaging-console'
   $useGit = (Get-Command git -ErrorAction SilentlyContinue) -and ($env:MC_NO_GIT -ne '1')
 
   function Say($m) { Write-Host "`n==> $m" -ForegroundColor Cyan }
+
+  # Where to put the app: the current folder, unless it is a Windows system folder
+  # (an Administrator PowerShell starts in C:\Windows\system32) or not writable.
+  function Writable($path) {
+    $probe = Join-Path $path ("mc-write-test-" + [guid]::NewGuid())
+    try { New-Item -ItemType Directory $probe -ErrorAction Stop | Out-Null; Remove-Item $probe -Force; return $true }
+    catch { return $false }
+  }
+  $here = (Get-Location).Path
+  $systemDirs = @($env:windir, $env:ProgramFiles, ${env:ProgramFiles(x86)}) | Where-Object { $_ }
+  $inSystem = $systemDirs | Where-Object { $here.StartsWith($_, [StringComparison]::OrdinalIgnoreCase) }
+  if ($inSystem -or -not (Writable $here)) {
+    $here = $HOME
+    Set-Location $here
+    Say "Using your user folder: $here"
+  }
+  $dir = Join-Path $here 'messaging-console'
 
   if ((Test-Path '.\init.ps1') -and (Test-Path '.\get.ps1')) {
     $dir = (Get-Location).Path
