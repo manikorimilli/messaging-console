@@ -50,37 +50,34 @@ Register a `WHATSAPP` provider the same way as an `SMS` one. WhatsApp numbers ca
 `whatsapp:` scheme on the wire; add it in the field templates, not in `variables`.
 
 WhatsApp only lets a business start a conversation with an approved **template**. Twilio sends
-one as `ContentSid` (the template's id, `HX...`, fixed per provider) and `ContentVariables` (the
-template's values as one JSON object, filled per message). `docs/providers/twilio-whatsapp.json`
+one by its id, `ContentSid` (`HX...`), fixed per provider. `docs/providers/twilio-whatsapp.json`
 does this:
 
 ```json
 "fields": {
   "To": "whatsapp:{{uaap.to}}",
   "From": "whatsapp:{{from}}",
-  "ContentSid": "{{content-sid}}",
-  "ContentVariables": "{{uaap.text}}"
+  "ContentSid": "{{content-sid}}"
 }
 ```
 
-- **Message `body`:** the template's values as JSON, e.g. `{"1":"12/1","2":"3pm"}`. The console
-  asks for JSON when a provider has a `ContentVariables` field.
-- **Ready to try:** `from` is Twilio's WhatsApp sandbox number and `content-sid` is Twilio's sample
-  "appointment reminder" template (`{{1}}` a date, `{{2}}` a time). In the sandbox, the
-  recipient must first send your sandbox's `join <code>` message to that number.
-- **Your own sender:** set `from` to your approved WhatsApp sender and `content-sid` to your
-  approved template. Register one provider per template.
-- **A template with no variables:** remove the `ContentVariables` field. The console then
-  needs no message text.
-- **Free text instead of a template:** replace `ContentSid` and `ContentVariables` with
-  `"Body": "{{uaap.text}}"`. This only reaches a recipient within 24 hours of their last
-  message to you (WhatsApp's "session" window).
+- **Values to fill:** `account-sid` and `auth-token` from your Twilio account, `from` your
+  WhatsApp sender number, and `content-sid` your approved template's id. Register one provider
+  per template.
+- **Message `body`:** not used. The template's text is fixed, so the console does not ask for a
+  message. The API still needs a non-blank `body`; any text works.
+- **A template with variables:** add `"ContentVariables": "{{uaap.text}}"` to `fields` and send
+  the values as JSON in the message `body`, e.g. `{"1":"12/1","2":"3pm"}`. The console then
+  asks for that JSON.
+- **Free text instead of a template:** replace `ContentSid` with `"Body": "{{uaap.text}}"`. This
+  only reaches a recipient within 24 hours of their last message to you (WhatsApp's
+  "session" window).
 
 ## Sending one message
 
 ```
 POST /api/v1/messages
-{ "type": "SMS", "provider": "TWILIO_SMS", "to": "+910000000001", "body": "Hello" }
+{ "type": "SMS", "provider": "TWILIO", "to": "+910000000001", "body": "Hello" }
 ```
 
 1. `MessageController` checks the request: every field is required, `to` must be E.164, `body`

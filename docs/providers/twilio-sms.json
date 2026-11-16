@@ -1,11 +1,12 @@
 {
-  "id": "TWILIO_SMS",
+  "id": "TWILIO",
   "display-name": "Twilio SMS",
   "channel": "SMS",
   "enabled": true,
   "variables": {
     "account-sid": "",
-    "auth-token": "",
+    "api-key": "",
+    "api-secret": "",
     "from": ""
   },
   "system-variables": {
@@ -15,18 +16,10 @@
   "request": {
     "method": "POST",
     "url": "https://api.twilio.com/2010-04-01/Accounts/{{account-sid}}/Messages.json",
-    "auth": {
-      "type": "basic",
-      "username": "{{account-sid}}",
-      "password": "{{auth-token}}"
-    },
+    "auth": { "type": "basic", "username": "{{api-key}}", "password": "{{api-secret}}" },
     "body": {
       "format": "form",
-      "fields": {
-        "To": "{{uaap.to}}",
-        "From": "{{from}}",
-        "Body": "{{uaap.text}}"
-      }
+      "fields": { "To": "{{uaap.to}}", "From": "{{from}}", "Body": "{{uaap.text}}" }
     }
   },
   "response": {

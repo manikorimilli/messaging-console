@@ -9,7 +9,7 @@ using one REST API. Follow these steps to run it locally. It takes about 15 minu
 
 - **Java 21 or newer (JDK).** Install commands are in step 1.
 - **Git.** To download the code. Install commands are in step 1.
-- **Your provider's keys.** For example your Twilio Account SID and Auth Token. You receive these separately,
+- **Your provider's keys.** For example your Twilio Account SID, API key and API secret (for SMS) and Auth Token (for WhatsApp). You receive these separately,
   not in this guide, and enter them when you register the provider (step 5).
 
 You don't need to install Maven. The project includes its own Maven (`mvnw`), which downloads
@@ -119,7 +119,7 @@ Copy one, fill in the empty `variables` values with the keys you received, and r
 
 ```bash
 cp ../docs/providers/twilio-sms.json my-twilio.json
-# edit my-twilio.json: fill in account-sid, auth-token and from
+# edit my-twilio.json: fill in account-sid, api-key, api-secret and from
 curl -i -X POST http://localhost:8080/api/v1/providers \
   -H "Content-Type: application/json" -d @my-twilio.json
 ```
@@ -141,7 +141,7 @@ of `+91XXXXXXXXXX`. `provider` must name a provider you registered in step 5.
 ```bash
 curl -i -X POST http://localhost:8080/api/v1/messages \
   -H "Content-Type: application/json" \
-  -d '{ "type": "SMS", "provider": "TWILIO_SMS", "to": "+91XXXXXXXXXX", "body": "sms_internal_alerts" }'
+  -d '{ "type": "SMS", "provider": "TWILIO", "to": "+91XXXXXXXXXX", "body": "sms_internal_alerts" }'
 ```
 
 **Windows:** use Swagger instead. Open `http://localhost:8080/swagger-ui.html`, choose
@@ -151,7 +151,7 @@ curl -i -X POST http://localhost:8080/api/v1/messages \
 **Request body**
 
 ```json
-{ "type": "SMS", "provider": "TWILIO_SMS", "to": "+91XXXXXXXXXX", "body": "sms_internal_alerts" }
+{ "type": "SMS", "provider": "TWILIO", "to": "+91XXXXXXXXXX", "body": "sms_internal_alerts" }
 ```
 
 `202 Accepted` means the provider took the message.
@@ -161,37 +161,36 @@ curl -i -X POST http://localhost:8080/api/v1/messages \
 
 ### 7. Send a test WhatsApp message
 
-Register `docs/providers/twilio-whatsapp.json` the same way as in step 5 (fill in `account-sid`
-and `auth-token`). As shipped it uses Twilio's WhatsApp sandbox: first, from your phone, send
-your sandbox's `join <code>` message (shown in the Twilio Console under **Messaging > Try it
-out > Send a WhatsApp message**) to `+14155238886`.
+Copy `docs/providers/twilio-whatsapp.json`, fill in `account-sid`, `auth-token`, `from` (your
+WhatsApp sender number) and `content-sid` (your approved template's id, `HX...`), and register it
+the same way as in step 5.
 
-The message `body` is the template's values as JSON. Twilio's sample template takes a date
-(`1`) and a time (`2`):
+The template's text is fixed, so `body` is not used; the API only needs it to be non-blank:
 
 ```bash
 curl -i -X POST http://localhost:8080/api/v1/messages \
   -H "Content-Type: application/json" \
-  -d '{ "type": "WHATSAPP", "provider": "TWILIO_WHATSAPP", "to": "+91XXXXXXXXXX", "body": "{\"1\":\"12/1\",\"2\":\"3pm\"}" }'
+  -d '{ "type": "WHATSAPP", "provider": "TWILIO_WHATSAPP", "to": "+91XXXXXXXXXX", "body": "template" }'
 ```
 
-`type` must be `WHATSAPP` for a WhatsApp provider. To send with your own WhatsApp sender, change
-`from` and `content-sid` in the file to your approved sender and template; see
-[how-it-works.md](how-it-works.md#whatsapp).
+`type` must be `WHATSAPP` for a WhatsApp provider. If you use Twilio's WhatsApp sandbox as the
+sender, the recipient must first send your sandbox's `join <code>` message to the sandbox number
+(both are shown in the Twilio Console under **Messaging > Try it out > Send a WhatsApp
+message**). For templates with variables, see [how-it-works.md](how-it-works.md#whatsapp).
 
 ## If something goes wrong
 
 | You see | Fix |
 |---|---|
 | `provider` in the `errors` list of a `400 VALIDATION_FAILED` | The request has no `provider`. Add the id of a provider you registered (step 5). |
-| `Provider 'TWILIO_SMS' is not registered` | Register it first (step 5). |
+| `Provider 'TWILIO' is not registered` | Register it first (step 5). |
 | `Port 8080 was already in use` | Another program uses port 8080. Stop that program, then start the app again. |
 | `java: command not found`, or an error about release 21 | Install Java (step 1) and open a new terminal. `java -version` must show 21 or higher. |
 | `JAVA_HOME is not defined correctly` (Windows) | Open a new terminal after installing Java. If it still appears, set `JAVA_HOME` to the Java folder, for example `C:\Program Files\Eclipse Adoptium\jdk-21...`. |
 | `permission denied: ./mvnw` | Run `chmod +x mvnw` once. |
 | `502 PROVIDER_REJECTED` with `Authentication Error` | A key in the registered provider was not copied correctly. Fix it with `PUT /api/v1/providers/{id}` or the console's Edit, with no extra spaces. |
 | Error `21608` | Trial account: verify the phone number in your Twilio Console. |
-| `UNSUPPORTED_MESSAGE_TYPE` | `type` does not match the provider's channel. Use `WHATSAPP` for `TWILIO_WHATSAPP` and `SMS` for `TWILIO_SMS`. |
+| `UNSUPPORTED_MESSAGE_TYPE` | `type` does not match the provider's channel. Use `WHATSAPP` for `TWILIO_WHATSAPP` and `SMS` for `TWILIO`. |
 | WhatsApp error `63007` or `63015` | The sandbox recipient has not sent the `join <code>` message, or the `from` number is not a WhatsApp sender. |
 
 ## How it works

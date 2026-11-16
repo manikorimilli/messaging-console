@@ -6,8 +6,8 @@
   "variables": {
     "account-sid": "",
     "auth-token": "",
-    "from": "+14155238886",
-    "content-sid": "HXb5b62575e6e4ff6129ad7c8efe1f983e"
+    "from": "",
+    "content-sid": ""
   },
   "system-variables": {
     "uaap.to": "",
@@ -26,8 +26,7 @@
       "fields": {
         "To": "whatsapp:{{uaap.to}}",
         "From": "whatsapp:{{from}}",
-        "ContentSid": "{{content-sid}}",
-        "ContentVariables": "{{uaap.text}}"
+        "ContentSid": "{{content-sid}}"
       }
     }
   },
