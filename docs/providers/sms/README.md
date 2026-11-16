@@ -1,32 +1,39 @@
 # Set up Twilio SMS
 
-Three parts: copy four values from Twilio, register them in the Messaging Console, send a test SMS.
+You register Twilio SMS in the **Messaging Console**. It asks for four values; each step below
+shows where to find that value in your Twilio account.
 
-| Value | Where you find it in Twilio | Looks like |
-|---|---|---|
-| `account-sid` | Home page, **Account SID** | `AC...` (34 characters) |
-| `api-key` | New API key, **SID** | `SK...` (34 characters) |
-| `api-secret` | New API key, **Client secret** (shown only once) | 32 characters |
-| `from` | **Try out SMS**, **From** | `+15551234567` |
+## Part 1: Start in the Messaging Console
 
-Keep these values private. Anyone who has them can send messages on your account.
+### Step 1. Open Register provider
 
-## Part 1: Get your values from Twilio
+Open **http://localhost:5173**, go to **Providers** and click **Register provider**.
 
-Sign in at **https://console.twilio.com**.
+![Providers page with the Register provider button](images/06-providers-empty.png)
 
-### Step 1. Copy the Account SID
+### Step 2. Paste the template
 
-On the **Home** page, copy the **Account SID** (click the copy icon next to it). This is your
-`account-sid`.
+Open [twilio-sms.json](twilio-sms.json), copy all of it, and paste it into the box. Four boxes
+appear below it: `account-sid`, `api-key`, `api-secret` and `from`.
 
-Then click **API keys & auth tokens** below it.
+![Register provider form after pasting the template](images/07-register-empty.png)
 
-![Twilio home page: Account SID and the API keys & auth tokens link](images/01-home-account-sid.png)
+## Part 2: Fill in each box from Twilio
 
-### Step 2. Create an API key
+Keep the Messaging Console open. In another browser tab, sign in at
+**https://console.twilio.com**.
 
-On **API keys & auth tokens**, stay on the **API keys** tab and click **Create API key**.
+### Step 3. `account-sid`
+
+In Twilio, on the **Home** page, copy the **Account SID** (starts with `AC`). Paste it into the
+`account-sid` box.
+
+![Twilio home page with the Account SID](images/01-home-account-sid.png)
+
+### Step 4. `api-key` and `api-secret`
+
+In Twilio, on the **Home** page, click **API keys & auth tokens**. Stay on the **API keys** tab and
+click **Create API key**.
 
 ![API keys page with the Create API key button](images/02-api-keys-page.png)
 
@@ -35,42 +42,25 @@ click **Next**.
 
 ![Create API key: name and key type Main](images/03-create-api-key.png)
 
-### Step 3. Copy the SID and the Client secret
+Copy both values now. **The Client secret is shown only once.**
 
-Copy both values now. **The Client secret is shown only once.** If you lose it, create a new key.
-
-- **SID** is your `api-key`
-- **Client secret** is your `api-secret`
+- **SID** (starts with `SK`): paste it into the `api-key` box.
+- **Client secret**: paste it into the `api-secret` box.
 
 Tick **Got it!** and click **Finish**.
 
 ![Copy secret page with the SID and the Client secret](images/04-copy-secret.png)
 
-### Step 4. Copy your Twilio phone number
+### Step 5. `from`
 
-Go back to **Home**. Under **Try it out**, open **Send an SMS**. The **From** number is your
-`from`. Copy it with the `+` and the country code, no spaces.
+In Twilio, go back to **Home**. Under **Try it out**, open **Send an SMS**. Copy the **From**
+number with the `+` and the country code, no spaces. Paste it into the `from` box.
 
 ![Try out SMS with the From number](images/05-from-number.png)
 
-## Part 2: Register the provider in the Messaging Console
+### Step 6. Register
 
-### Step 5. Open Register provider
-
-Open **http://localhost:5173**, go to **Providers** and click **Register provider**.
-
-![Providers page with the Register provider button](images/06-providers-empty.png)
-
-### Step 6. Paste the template
-
-Open [twilio-sms.json](twilio-sms.json), copy all of it, and paste it into the box. Four boxes
-appear below it: `account-sid`, `api-key`, `api-secret` and `from`.
-
-![Register provider form after pasting the template](images/07-register-empty.png)
-
-### Step 7. Fill in your values and register
-
-Paste the four values from Part 1. Click **Validate**. When it says **Configuration looks valid**,
+Back in the Messaging Console, click **Validate**. When it says **Configuration looks valid**,
 click **Register provider**.
 
 ![Register provider form with the four values filled in](images/08-register-filled.png)
@@ -81,7 +71,7 @@ The provider now shows in the list as **TWILIO**, **Enabled**.
 
 ## Part 3: Send a test SMS
 
-### Step 8. Send
+### Step 7. Send
 
 Open **Send Message**:
 
