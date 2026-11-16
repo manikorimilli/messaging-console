@@ -2,14 +2,14 @@
 
 ## Run the Messaging Service on your computer
 
-The Messaging Service sends SMS through providers you register (for example Twilio or Vonage)
+The Messaging Service sends SMS and WhatsApp messages through providers you register (for example Twilio)
 using one REST API. Follow these steps to run it locally. It takes about 15 minutes the first time.
 
 ## What you need
 
 - **Java 21 or newer (JDK).** Install commands are in step 1.
 - **Git.** To download the code. Install commands are in step 1.
-- **Your provider's keys.** For example the Twilio or Vonage keys. You receive these separately,
+- **Your provider's keys.** For example your Twilio Account SID, API key and API secret (for SMS) and Auth Token (for WhatsApp). You receive these separately,
   not in this guide, and enter them when you register the provider (step 5).
 
 You don't need to install Maven. The project includes its own Maven (`mvnw`), which downloads
@@ -112,13 +112,13 @@ http://localhost:8080/swagger-ui.html
 
 ### 5. Register a provider
 
-The app starts with no providers. Ready-made files for Twilio and Vonage are in `docs/providers/` at the top of the repository.
+The app starts with no providers. Ready-made files for Twilio SMS and Twilio WhatsApp are in `docs/providers/` at the top of the repository.
 Copy one, fill in the empty `variables` values with the keys you received, and register it.
 
 **macOS / Linux**
 
 ```bash
-cp ../docs/providers/twilio.json my-twilio.json
+cp ../docs/providers/twilio-sms.json my-twilio.json
 # edit my-twilio.json: fill in account-sid, api-key, api-secret and from
 curl -i -X POST http://localhost:8080/api/v1/providers \
   -H "Content-Type: application/json" -d @my-twilio.json
@@ -157,8 +157,26 @@ curl -i -X POST http://localhost:8080/api/v1/messages \
 `202 Accepted` means the provider took the message.
 
 > **Trial accounts:** a Twilio trial only sends to numbers verified in your Twilio Console (others
-> fail with error `21608`). Vonage demo mode only sends to whitelisted test numbers (others fail
-> with status `29`).
+> fail with error `21608`).
+
+### 7. Send a test WhatsApp message
+
+Copy `docs/providers/twilio-whatsapp.json`, fill in `account-sid`, `auth-token`, `from` (your
+WhatsApp sender number) and `content-sid` (your approved template's id, `HX...`), and register it
+the same way as in step 5.
+
+The template's text is fixed, so `body` is not used; the API only needs it to be non-blank:
+
+```bash
+curl -i -X POST http://localhost:8080/api/v1/messages \
+  -H "Content-Type: application/json" \
+  -d '{ "type": "WHATSAPP", "provider": "TWILIO_WHATSAPP", "to": "+91XXXXXXXXXX", "body": "template" }'
+```
+
+`type` must be `WHATSAPP` for a WhatsApp provider. If you use Twilio's WhatsApp sandbox as the
+sender, the recipient must first send your sandbox's `join <code>` message to the sandbox number
+(both are shown in the Twilio Console under **Messaging > Try it out > Send a WhatsApp
+message**). For templates with variables, see [how-it-works.md](how-it-works.md#whatsapp).
 
 ## If something goes wrong
 
@@ -171,7 +189,9 @@ curl -i -X POST http://localhost:8080/api/v1/messages \
 | `JAVA_HOME is not defined correctly` (Windows) | Open a new terminal after installing Java. If it still appears, set `JAVA_HOME` to the Java folder, for example `C:\Program Files\Eclipse Adoptium\jdk-21...`. |
 | `permission denied: ./mvnw` | Run `chmod +x mvnw` once. |
 | `502 PROVIDER_REJECTED` with `Authentication Error` | A key in the registered provider was not copied correctly. Fix it with `PUT /api/v1/providers/{id}` or the console's Edit, with no extra spaces. |
-| Error `21608` or status `29` | Trial or demo account: verify or whitelist the phone number with the provider. |
+| Error `21608` | Trial account: verify the phone number in your Twilio Console. |
+| `UNSUPPORTED_MESSAGE_TYPE` | `type` does not match the provider's channel. Use `WHATSAPP` for `TWILIO_WHATSAPP` and `SMS` for `TWILIO`. |
+| WhatsApp error `63007` or `63015` | The sandbox recipient has not sent the `join <code>` message, or the `from` number is not a WhatsApp sender. |
 
 ## How it works
 

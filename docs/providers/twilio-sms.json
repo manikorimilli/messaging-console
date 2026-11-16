@@ -1,13 +1,13 @@
 {
-  "id": "TWILIO_WHATSAPP_DELIVERY_UPDATE",
-  "display-name": "Twilio WhatsApp - Delivery Update",
-  "channel": "WHATSAPP",
+  "id": "TWILIO",
+  "display-name": "Twilio SMS",
+  "channel": "SMS",
   "enabled": true,
   "variables": {
     "account-sid": "",
-    "auth-token": "",
-    "from": "",
-    "content-sid": ""
+    "api-key": "",
+    "api-secret": "",
+    "from": ""
   },
   "system-variables": {
     "uaap.to": "",
@@ -16,18 +16,10 @@
   "request": {
     "method": "POST",
     "url": "https://api.twilio.com/2010-04-01/Accounts/{{account-sid}}/Messages.json",
-    "auth": {
-      "type": "basic",
-      "username": "{{account-sid}}",
-      "password": "{{auth-token}}"
-    },
+    "auth": { "type": "basic", "username": "{{api-key}}", "password": "{{api-secret}}" },
     "body": {
       "format": "form",
-      "fields": {
-        "To": "whatsapp:{{uaap.to}}",
-        "From": "whatsapp:{{from}}",
-        "ContentSid": "{{content-sid}}"
-      }
+      "fields": { "To": "{{uaap.to}}", "From": "{{from}}", "Body": "{{uaap.text}}" }
     }
   },
   "response": {

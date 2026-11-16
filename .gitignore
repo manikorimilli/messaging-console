@@ -17,3 +17,9 @@ node_modules/
 
 # Logs
 *.log
+
+# Logs from ./run.sh
+logs/
+
+# Java and Node.js downloaded by ./init.sh
+.tools/

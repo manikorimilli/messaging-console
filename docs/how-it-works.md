@@ -19,8 +19,7 @@ each provider (Twilio, Vonage, ...) is a JSON definition registered through the 
 
 ## A provider definition
 
-Ready-to-fill examples: `docs/providers/twilio.json`, `docs/providers/vonage.json`,
-`docs/providers/twilio-whatsapp.json` and `docs/providers/twilio-whatsapp-template.json`.
+Ready-to-fill examples: `docs/providers/twilio-sms.json` and `docs/providers/twilio-whatsapp.json`.
 
 | Field | Meaning |
 |---|---|
@@ -48,19 +47,31 @@ Recipient and message values are not allowed in the URL. `${...}` is never a pla
 ### WhatsApp
 
 Register a `WHATSAPP` provider the same way as an `SMS` one. WhatsApp numbers carry a
-`whatsapp:` scheme on the wire; add it in the field templates, not in `variables`:
+`whatsapp:` scheme on the wire; add it in the field templates, not in `variables`.
+
+WhatsApp only lets a business start a conversation with an approved **template**. Twilio sends
+one by its id, `ContentSid` (`HX...`), fixed per provider. `docs/providers/twilio-whatsapp.json`
+does this:
 
 ```json
-"fields": { "To": "whatsapp:{{to}}", "From": "whatsapp:{{from}}", "Body": "{{text}}" }
+"fields": {
+  "To": "whatsapp:{{uaap.to}}",
+  "From": "whatsapp:{{from}}",
+  "ContentSid": "{{content-sid}}"
+}
 ```
 
-This sends free text and only reaches a recipient within 24 hours of their last message to
-you (WhatsApp's "session" window; see `docs/providers/twilio-whatsapp.json`). Outside that
-window, or to start a conversation, WhatsApp requires an approved **template**. Twilio sends
-these as `ContentSid` (fixed per approved template) and `ContentVariables` (the template's
-values as one JSON object, e.g. `{"1":"12/1","2":"3pm"}`). Register one provider per template,
-with the template's id in `variables`, and send the `ContentVariables` JSON as the message
-`body`; see `docs/providers/twilio-whatsapp-template.json`.
+- **Values to fill:** `account-sid` and `auth-token` from your Twilio account, `from` your
+  WhatsApp sender number, and `content-sid` your approved template's id. Register one provider
+  per template.
+- **Message `body`:** not used. The template's text is fixed, so the console does not ask for a
+  message. The API still needs a non-blank `body`; any text works.
+- **A template with variables:** add `"ContentVariables": "{{uaap.text}}"` to `fields` and send
+  the values as JSON in the message `body`, e.g. `{"1":"12/1","2":"3pm"}`. The console then
+  asks for that JSON.
+- **Free text instead of a template:** replace `ContentSid` with `"Body": "{{uaap.text}}"`. This
+  only reaches a recipient within 24 hours of their last message to you (WhatsApp's
+  "session" window).
 
 ## Sending one message
 

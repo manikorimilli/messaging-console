@@ -28,7 +28,7 @@ import com.example.messaging_service.provider.OutboundMessage;
 import com.example.messaging_service.provider.ProviderResult;
 
 /**
- * The Twilio provider from docs/providers/twilio.json must behave exactly like the former
+ * The Twilio provider from src/test/resources/providers/twilio.json must behave exactly like the former
  * TwilioSmsProvider:
  * same request on the wire, same results, same errors.
  */

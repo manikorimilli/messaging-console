@@ -14,8 +14,7 @@ import com.example.messaging_service.provider.extensible.ExtensibleProviderDefin
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Loads a provider from src/test/resources/providers (the same files as docs/providers, in the
- * registration format), with test values for its variables.
+ * Loads a provider from src/test/resources/providers (in the registration format), with test values for its variables.
  */
 final class ProviderBlocks {
 
