@@ -161,7 +161,7 @@ curl -i -X POST http://localhost:8080/api/v1/messages \
 
 ### 7. Send a test WhatsApp message
 
-Copy `docs/providers/whatsapp/twilio-whatsapp.json`, fill in `account-sid`, `auth-token`, `from` (your
+Copy `docs/providers/whatsapp/twilio-whatsapp.json`, fill in `account-sid`, `api-key`, `api-secret`, `from` (your
 WhatsApp sender number) and `content-sid` (your approved template's id, `HX...`), and register it
 the same way as in step 5.
 

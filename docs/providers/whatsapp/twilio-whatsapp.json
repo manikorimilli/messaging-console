@@ -5,7 +5,8 @@
   "enabled": true,
   "variables": {
     "account-sid": "",
-    "auth-token": "",
+    "api-key": "",
+    "api-secret": "",
     "from": "",
     "content-sid": ""
   },
@@ -16,18 +17,10 @@
   "request": {
     "method": "POST",
     "url": "https://api.twilio.com/2010-04-01/Accounts/{{account-sid}}/Messages.json",
-    "auth": {
-      "type": "basic",
-      "username": "{{account-sid}}",
-      "password": "{{auth-token}}"
-    },
+    "auth": { "type": "basic", "username": "{{api-key}}", "password": "{{api-secret}}" },
     "body": {
       "format": "form",
-      "fields": {
-        "To": "whatsapp:{{uaap.to}}",
-        "From": "whatsapp:{{from}}",
-        "ContentSid": "{{content-sid}}"
-      }
+      "fields": { "To": "whatsapp:{{uaap.to}}", "From": "whatsapp:{{from}}", "ContentSid": "{{content-sid}}" }
     }
   },
   "response": {

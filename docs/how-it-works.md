@@ -61,8 +61,9 @@ does this:
 }
 ```
 
-- **Values to fill:** `account-sid` and `auth-token` from your Twilio account, `from` your
-  WhatsApp sender number, and `content-sid` your approved template's id. Register one provider
+- **Values to fill:** `account-sid`, plus `api-key` and `api-secret` from a Twilio API key (the
+  same sign-in as SMS), `from` your WhatsApp sender number, and `content-sid` your approved
+  template's id. `content-sid` is not a secret; it only names the template. Register one provider
   per template.
 - **Message `body`:** not used. The template's text is fixed, so the console does not ask for a
   message. The API still needs a non-blank `body`; any text works.
