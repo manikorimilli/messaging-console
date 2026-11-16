@@ -1,7 +1,7 @@
 # Messaging Console
 
-Register SMS providers (Twilio, Vonage, or any provider with an HTTP API) and send messages
-through them.
+Register SMS or WhatsApp providers (Twilio, Vonage, or any provider with an HTTP API) and send
+messages through them.
 
 | Folder | What it is | Runs at |
 |---|---|---|
