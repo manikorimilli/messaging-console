@@ -85,18 +85,22 @@ changes.
 Open **http://localhost:5173**, go to **Providers** and click **Register provider**. Open
 [twilio-whatsapp.json](twilio-whatsapp.json), copy all of it, and paste it into the box.
 
-![Register provider with the WhatsApp template pasted](images/05-register-paste.png)
-
 Five boxes appear below it: `account-sid`, `api-key`, `api-secret`, `from` and `content-sid`.
 
-![Register provider form with the empty boxes](images/06-register-empty.png)
+![Register provider with the WhatsApp template pasted and its five boxes](images/06-register-empty.png)
 
 ### Step 7. Fill in your values and register
 
-Paste the five values from Part 1. Click **Validate**. When it says **Configuration looks valid**,
-click **Register provider**.
+Paste the five values from Part 1 into their boxes:
 
-![Register provider form with the values filled in](images/07-register-filled.png)
+| Box | Value from |
+|---|---|
+| `account-sid` | Step 1 |
+| `api-key`, `api-secret` | Step 2 (the API key's SID and Client secret) |
+| `from` | Step 4 |
+| `content-sid` | Step 5 |
+
+Click **Validate**. When it says **Configuration looks valid**, click **Register provider**.
 
 The provider now shows in the list as **TWILIO_WHATSAPP**, channel **WHATSAPP**, **Enabled**.
 
