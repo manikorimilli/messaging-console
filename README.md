@@ -37,8 +37,20 @@ Open http://localhost:5173/ and use the Messaging Console.
 | API documentation (Swagger) | http://localhost:8080/swagger-ui.html |
 | Server health check | http://localhost:8080/actuator/health |
 
-To send messages, register a provider first. Step-by-step guides:
-[SMS](docs/providers/sms/README.md) and [WhatsApp](docs/providers/whatsapp/README.md).
+## Register a provider
+
+Before you can send messages, register a provider. Follow the step-by-step guide for the channel
+you need.
+
+### SMS
+
+**[Set up Twilio SMS](docs/providers/sms/README.md)**
+
+### WhatsApp
+
+**[Set up Twilio WhatsApp](docs/providers/whatsapp/README.md)**
+
+## Options
 
 Both run scripts take the same options, for example `--port 9090`, `--mock` or `--no-build`.
 Add `--help` to see them all. `Ctrl + C` stops the server and the client.
