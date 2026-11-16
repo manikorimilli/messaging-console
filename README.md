@@ -2,34 +2,45 @@
 
 Send SMS and WhatsApp messages through your Twilio account, from a simple web page.
 
-Works on **macOS** and **Linux**. On Windows, use [WSL](https://learn.microsoft.com/windows/wsl/install)
-(Ubuntu) and run everything inside it.
+Works on **Windows**, **macOS** and **Linux**. Nothing is installed on your system, and no admin
+rights or password are needed.
 
 ## 1. Download and set up (once)
 
-Open a terminal and paste this one line:
+**Windows:** open **PowerShell** (Start menu, type "PowerShell") and paste:
+
+```powershell
+irm https://raw.githubusercontent.com/manikorimilli/messaging-console/main/get.ps1 | iex
+```
+
+**macOS / Linux:** open **Terminal** and paste:
 
 ```bash
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/manikorimilli/messaging-console/main/get.sh || wget -qO- https://raw.githubusercontent.com/manikorimilli/messaging-console/main/get.sh)"
 ```
 
 It downloads the app into a `messaging-console` folder and sets everything up, including Java and
-Node.js if your computer doesn't have them. Nothing is installed on your system and no password
-is needed. Takes about 2 to 4 minutes the first time.
+Node.js if your computer doesn't have them. Takes about 2 to 4 minutes the first time.
 
 ## 2. Start
 
-```bash
+**Windows:** open the `messaging-console` folder and double-click **`run.cmd`**. Or in PowerShell:
+
+```powershell
 cd messaging-console
+.\run.cmd
 ```
 
+**macOS / Linux:**
+
 ```bash
+cd messaging-console
 ./run.sh
 ```
 
 When you see **Ready**, open **http://localhost:5173**.
 
-Press `Ctrl + C` to stop. Next time, only these two commands are needed.
+Press `Ctrl + C` to stop. Next time, only step 2 is needed.
 
 ## 3. Add your Twilio account
 
@@ -61,9 +72,9 @@ A green **Accepted by provider** card means Twilio took the message.
 
 | You see | Do this |
 |---|---|
-| `Permission denied` when running a script | Run `chmod +x init.sh run.sh` once. |
-| `Run ./init.sh first` | Run `./init.sh` in the `messaging-console` folder, then `./run.sh`. |
-| `Port 8080 is in use` or `Port 5173 is in use` | Another copy is still running. Stop it, or start on other ports: `SERVER_PORT=9090 CLIENT_PORT=3000 ./run.sh` |
+| `Permission denied` when running a script (macOS / Linux) | Run `chmod +x init.sh run.sh` once. |
+| `Run ./init.sh first` / `Run setup first` | Run the step 1 command again from the folder that contains `messaging-console`. |
+| `Port 8080 is in use` or `Port 5173 is in use` | Another copy is still running. Stop it, or start on other ports: `SERVER_PORT=9090 CLIENT_PORT=3000 ./run.sh` (Windows: `$env:SERVER_PORT=9090; $env:CLIENT_PORT=3000; .\run.ps1`) |
 | `Authentication Error` when sending | A value was copied wrong. On **Providers**, click **...** next to the provider, choose **Edit**, and paste it again. |
 | Twilio error `21608` | Your Twilio trial can only send to numbers verified in the Twilio Console. |
 | Anything else | Look in the `logs/` folder: `server.log` and `client.log`. |
