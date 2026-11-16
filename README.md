@@ -1,78 +1,70 @@
 # Messaging Console
 
-Register SMS or WhatsApp providers (Twilio, Vonage, or any provider with an HTTP API) and send
-messages through them.
+Send SMS and WhatsApp messages through your Twilio account, from a simple web page.
 
-| Folder | What it is | Runs at |
-|---|---|---|
-| `server/` | The API: Java 21, Spring Boot, Maven | `http://localhost:8080` |
-| `client/` | The web console: React, Vite | `http://localhost:5173` |
-| `docs/` | Guides and ready-to-fill provider files | |
+Works on **macOS** and **Linux**. On Windows, use [WSL](https://learn.microsoft.com/windows/wsl/install)
+(Ubuntu) and run everything inside it.
 
-## Quick start
+## 1. Set up (once)
 
-You need **Java 21 or newer** and **Node.js 22.12 or newer**. Install steps for each system are in
-[docs/setup-server.md](docs/setup-server.md) and [docs/setup-client.md](docs/setup-client.md).
+```bash
+./init.sh
+```
 
-1. Install the shortcuts and the client's packages (once):
+This installs Java 21 and Node.js 22 if you don't have them, then downloads everything else.
+It may ask for your computer password. Takes about 2 to 4 minutes the first time.
 
-   ```bash
-   npm install
-   ```
+## 2. Start
 
-   ```bash
-   npm run setup
-   ```
+```bash
+./run.sh
+```
 
-2. Create the client's settings file and point it at the local server (once):
+When you see **Ready**, open **http://localhost:5173**.
 
-   ```bash
-   cp client/.env.example client/.env
-   ```
+Press `Ctrl + C` to stop.
 
-   In `client/.env`, set `VITE_USE_MOCK_API=false` and keep
-   `DEV_PROXY_TARGET=http://localhost:8080`. (Set it to `true` to try the console without the server:
-   everything is simulated in the browser, and it starts with no providers, so register one first.)
+## 3. Add your Twilio account
 
-3. Start the server and the client together:
+1. Open **Providers** and click **Register provider**.
+2. Paste the content of one of these files:
+   - [docs/providers/twilio-sms.json](docs/providers/twilio-sms.json) for SMS
+   - [docs/providers/twilio-whatsapp.json](docs/providers/twilio-whatsapp.json) for WhatsApp
+3. Fill in the boxes that appear with your values from the [Twilio Console](https://console.twilio.com):
 
-   ```bash
-   npm run dev
-   ```
+   | Box | What to enter |
+   |---|---|
+   | `account-sid` | Your Account SID (starts with `AC`) |
+   | `api-key`, `api-secret` | An API key and its secret (SMS only) |
+   | `auth-token` | Your Auth Token (WhatsApp only) |
+   | `from` | Your Twilio phone number, e.g. `+15551234567` |
+   | `content-sid` | Your approved WhatsApp template id (starts with `HX`, WhatsApp only) |
 
-   Logs from both appear in one terminal, labelled `[server]` and `[client]`. `Ctrl + C` stops
-   both. The server takes a few seconds longer to start; if the console says it cannot reach the
-   server, wait a moment and click **Refresh**.
+4. Click **Validate**, then **Register provider**.
 
-4. Open `http://localhost:5173` and register a provider on the **Providers** page. Ready-made
-   files are in [docs/providers/](docs/providers/): paste one and fill in your keys.
+## 4. Send a message
 
-5. Open **Send Message**, choose the provider, and send a test message.
+Open **Send Message**, choose the provider, enter the phone number with country code
+(e.g. `+919876543210`), type the message, and click **Send Message**. For WhatsApp no message
+is needed: your approved template's text is sent.
 
-`npm run dev` is only a shortcut. The server is a plain Maven project and still runs on its own
-with `cd server && ./mvnw spring-boot:run`, and the client with `cd client && npm run dev`.
+A green **Accepted by provider** card means Twilio took the message.
 
-## Other commands
+## If something goes wrong
 
-| Command | What it does |
+| You see | Do this |
 |---|---|
-| `npm run dev:server` | Start only the server |
-| `npm run dev:client` | Start only the client |
-| `npm test` | Run the server tests, then the client tests |
+| `Permission denied` when running a script | Run `chmod +x init.sh run.sh` once. |
+| `Run ./init.sh first` | Run `./init.sh`, then `./run.sh`. |
+| `Port 8080 is in use` or `Port 5173 is in use` | Another copy is still running. Stop it, or start on other ports: `SERVER_PORT=9090 CLIENT_PORT=3000 ./run.sh` |
+| `Authentication Error` when sending | A value was copied wrong. On **Providers**, click **...** next to the provider, choose **Edit**, and paste it again. |
+| Twilio error `21608` | Your Twilio trial can only send to numbers verified in the Twilio Console. |
+| Anything else | Look in the `logs/` folder: `server.log` and `client.log`. |
 
-## Documentation
+## Good to know
 
-| Guide | Read it for |
-|---|---|
-| [docs/how-it-works.md](docs/how-it-works.md) | Endpoints, the provider format and placeholders, error codes, a map of the code |
-| [docs/setup-server.md](docs/setup-server.md) | Installing Java, running the server, registering a provider, sending with `curl` |
-| [docs/setup-client.md](docs/setup-client.md) | Installing Node.js, running the console, mock or live data |
-| [docs/client-reference.md](docs/client-reference.md) | Client settings, pages, mock test numbers, tests and build |
-
-## Local files that are never committed
-
-| File | What it holds |
-|---|---|
-| `server/db.json` | Registered providers, with their real keys |
-| `server/.env`, `client/.env` | Local settings |
-| `server/target/`, `client/node_modules/`, `client/dist/`, `node_modules/` | Build output and packages |
+- Your registered providers, with their keys, are saved in `server/db.json` on this computer only.
+  Don't share that file.
+- API documentation: **http://localhost:8080/swagger-ui.html** while the app is running.
+- More detail: [how it works](docs/how-it-works.md), [server setup](docs/setup-server.md),
+  [client setup](docs/setup-client.md), [client reference](docs/client-reference.md).
