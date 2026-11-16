@@ -1,78 +1,107 @@
-# Register Twilio SMS
+# Set up Twilio SMS
 
-Template: [twilio-sms.json](twilio-sms.json)
+Three parts: copy four values from Twilio, register them in the Messaging Console, send a test SMS.
 
-You need four values from your Twilio account. Then you paste the template into the Messaging
-Console and fill them in.
+| Value | Where you find it in Twilio | Looks like |
+|---|---|---|
+| `account-sid` | Home page, **Account SID** | `AC...` (34 characters) |
+| `api-key` | New API key, **SID** | `SK...` (34 characters) |
+| `api-secret` | New API key, **Client secret** (shown only once) | 32 characters |
+| `from` | **Try out SMS**, **From** | `+15551234567` |
 
-## 1. Get your values from Twilio
+Keep these values private. Anyone who has them can send messages on your account.
+
+## Part 1: Get your values from Twilio
 
 Sign in at **https://console.twilio.com**.
 
-> Twilio sometimes moves menus. If a menu name doesn't match, type it into the **search bar** at
-> the top of the Console.
+### Step 1. Copy the Account SID
 
-### Account SID and phone number
+On the **Home** page, copy the **Account SID** (click the copy icon next to it). This is your
+`account-sid`.
 
-On the Console home page, scroll down to the **Account Info** box.
+Then click **API keys & auth tokens** below it.
 
-![Account Info box on the Twilio Console home page](images/01-account-info.png)
+![Twilio home page: Account SID and the API keys & auth tokens link](images/01-home-account-sid.png)
 
-| Box in the app | Where in Twilio | Looks like |
-|---|---|---|
-| `account-sid` | **Account SID** | `AC` + 32 letters and numbers |
-| `from` | **My Twilio phone number** | `+15551234567` |
+### Step 2. Create an API key
 
-If **My Twilio phone number** is not shown, open **Phone Numbers > Manage > Active numbers** and
-copy the number with `+` and the country code, no spaces.
+On **API keys & auth tokens**, stay on the **API keys** tab and click **Create API key**.
 
-![Active numbers page](images/02-active-numbers.png)
+![API keys page with the Create API key button](images/02-api-keys-page.png)
 
-### API key and secret
+Enter any **API key name** (for example `messaging-console`), set **Key type** to **Main**, and
+click **Next**.
 
-1. Open **API keys & tokens** (Account menu, top right).
-2. Click **Create API key**, give it any name (e.g. `messaging-console`), keep type **Standard**,
-   and click **Create**.
+![Create API key: name and key type Main](images/03-create-api-key.png)
 
-   ![Create API key form](images/03-create-api-key.png)
+### Step 3. Copy the SID and the Client secret
 
-3. Copy both values right away. The secret is shown **only once**.
+Copy both values now. **The Client secret is shown only once.** If you lose it, create a new key.
 
-   ![New API key with its SID and secret](images/04-api-key-created.png)
+- **SID** is your `api-key`
+- **Client secret** is your `api-secret`
 
-| Box in the app | Where in Twilio | Looks like |
-|---|---|---|
-| `api-key` | **SID** of the new key | `SK` + 32 letters and numbers |
-| `api-secret` | **Secret** of the new key | 32 letters and numbers |
+Tick **Got it!** and click **Finish**.
 
-## 2. Register the provider in the Messaging Console
+![Copy secret page with the SID and the Client secret](images/04-copy-secret.png)
 
-1. Open http://localhost:5173, go to **Providers** and click **Register provider**.
+### Step 4. Copy your Twilio phone number
 
-   ![Providers page with the Register provider button](images/05-providers-page.png)
+Go back to **Home**. Under **Try it out**, open **Send an SMS**. The **From** number is your
+`from`. Copy it with the `+` and the country code, no spaces.
 
-2. Paste the whole content of [twilio-sms.json](twilio-sms.json).
-3. Fill in the four boxes that appear: `account-sid`, `api-key`, `api-secret`, `from`.
+![Try out SMS with the From number](images/05-from-number.png)
 
-   ![Register provider form with the four boxes filled in](images/06-register-form.png)
+## Part 2: Register the provider in the Messaging Console
 
-4. Click **Validate**, then **Register provider**.
+### Step 5. Open Register provider
 
-## 3. Send a test SMS
+Open **http://localhost:5173**, go to **Providers** and click **Register provider**.
 
-Open **Send Message**, choose **TWILIO (SMS)**, enter a phone number with country code
-(e.g. `+919876543210`), type a message and click **Send Message**.
+![Providers page with the Register provider button](images/06-providers-empty.png)
 
-![Send Message page with an accepted result](images/07-send-message.png)
+### Step 6. Paste the template
+
+Open [twilio-sms.json](twilio-sms.json), copy all of it, and paste it into the box. Four boxes
+appear below it: `account-sid`, `api-key`, `api-secret` and `from`.
+
+![Register provider form after pasting the template](images/07-register-empty.png)
+
+### Step 7. Fill in your values and register
+
+Paste the four values from Part 1. Click **Validate**. When it says **Configuration looks valid**,
+click **Register provider**.
+
+![Register provider form with the four values filled in](images/08-register-filled.png)
+
+The provider now shows in the list as **TWILIO**, **Enabled**.
+
+![Providers list with TWILIO enabled](images/09-provider-registered.png)
+
+## Part 3: Send a test SMS
+
+### Step 8. Send
+
+Open **Send Message**:
+
+1. **Provider:** choose **TWILIO (SMS)**.
+2. **Recipient phone number:** with `+` and the country code, e.g. `+919876543210`.
+3. **Message:** on a Twilio trial account, click **Twilio template** and pick one (e.g.
+   `sms_feedback_surveys`). A trial only accepts these test messages.
+4. Click **Send Message**.
+
+![Send Message page filled in](images/10-send-message.png)
 
 A green **Accepted by provider** card means Twilio took the message.
+
+![Accepted by provider result](images/11-message-accepted.png)
 
 ## If something goes wrong
 
 | You see | Do this |
 |---|---|
-| `Authentication Error` | `api-key` or `api-secret` was copied wrong. On **Providers**, click **...** next to the provider, choose **Edit**, and paste it again. |
-| Twilio error `21608` | A Twilio trial can only send to numbers verified in the Twilio Console. |
-| Twilio error `21211` | The phone number is not valid. Use `+`, the country code and the number, no spaces. |
-
-Keep these values private. Anyone who has them can send messages on your account.
+| `Authentication Error` | `api-key` or `api-secret` was copied wrong. On **Providers**, click **...** next to TWILIO, choose **Edit**, and paste them again. Lost the secret? Create a new API key (Step 2). |
+| Twilio error `21608` | A trial account only sends to phone numbers verified in your Twilio Console. |
+| Twilio error `21211` | The recipient number is not valid. Use `+`, the country code and the number, no spaces. |
+| Message rejected on a trial | Pick a message from **Twilio template** instead of typing your own. |
