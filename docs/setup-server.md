@@ -9,7 +9,7 @@ using one REST API. Follow these steps to run it locally. It takes about 15 minu
 
 - **Java 21 or newer (JDK).** Install commands are in step 1.
 - **Git.** To download the code. Install commands are in step 1.
-- **Your provider's keys.** For example your Twilio Account SID, API key and API secret (for SMS) and Auth Token (for WhatsApp). You receive these separately,
+- **Your provider's keys.** For example your Twilio Account SID, API key and API secret (the same for SMS and WhatsApp). You receive these separately,
   not in this guide, and enter them when you register the provider (step 5).
 
 You don't need to install Maven. The project includes its own Maven (`mvnw`), which downloads
@@ -161,7 +161,7 @@ curl -i -X POST http://localhost:8080/api/v1/messages \
 
 ### 7. Send a test WhatsApp message
 
-Copy `docs/providers/whatsapp/twilio-whatsapp.json`, fill in `account-sid`, `auth-token`, `from` (your
+Copy `docs/providers/whatsapp/twilio-whatsapp.json`, fill in `account-sid`, `api-key`, `api-secret`, `from` (your
 WhatsApp sender number) and `content-sid` (your approved template's id, `HX...`), and register it
 the same way as in step 5.
 
