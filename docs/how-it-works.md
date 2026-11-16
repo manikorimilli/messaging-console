@@ -47,26 +47,40 @@ Recipient and message values are not allowed in the URL. `${...}` is never a pla
 ### WhatsApp
 
 Register a `WHATSAPP` provider the same way as an `SMS` one. WhatsApp numbers carry a
-`whatsapp:` scheme on the wire; add it in the field templates, not in `variables`:
+`whatsapp:` scheme on the wire; add it in the field templates, not in `variables`.
+
+WhatsApp only lets a business start a conversation with an approved **template**. Twilio sends
+one as `ContentSid` (the template's id, `HX...`, fixed per provider) and `ContentVariables` (the
+template's values as one JSON object, filled per message). `docs/providers/twilio-whatsapp.json`
+does this:
 
 ```json
-"fields": { "To": "whatsapp:{{uaap.to}}", "From": "whatsapp:{{from}}", "Body": "{{uaap.text}}" }
+"fields": {
+  "To": "whatsapp:{{uaap.to}}",
+  "From": "whatsapp:{{from}}",
+  "ContentSid": "{{content-sid}}",
+  "ContentVariables": "{{uaap.text}}"
+}
 ```
 
-This sends free text and only reaches a recipient within 24 hours of their last message to
-you (WhatsApp's "session" window; see `docs/providers/twilio-whatsapp.json`). Outside that
-window, or to start a conversation, WhatsApp requires an approved **template**. Twilio sends
-these as `ContentSid` (fixed per approved template) and `ContentVariables` (the template's
-values as one JSON object, e.g. `{"1":"12/1","2":"3pm"}`). Register one provider per template,
-with the template's id in `variables` (as `content-sid`), use `"ContentSid": "{{content-sid}}"`
-and `"ContentVariables": "{{uaap.text}}"` in place of `Body`, and send the `ContentVariables`
-JSON as the message `body`.
+- **Message `body`:** the template's values as JSON, e.g. `{"1":"12/1","2":"3pm"}`. The console
+  asks for JSON when a provider has a `ContentVariables` field.
+- **Ready to try:** `from` is Twilio's WhatsApp sandbox number and `content-sid` is Twilio's sample
+  "appointment reminder" template (`{{1}}` a date, `{{2}}` a time). In the sandbox, the
+  recipient must first send your sandbox's `join <code>` message to that number.
+- **Your own sender:** set `from` to your approved WhatsApp sender and `content-sid` to your
+  approved template. Register one provider per template.
+- **A template with no variables:** remove the `ContentVariables` field. The console then
+  needs no message text.
+- **Free text instead of a template:** replace `ContentSid` and `ContentVariables` with
+  `"Body": "{{uaap.text}}"`. This only reaches a recipient within 24 hours of their last
+  message to you (WhatsApp's "session" window).
 
 ## Sending one message
 
 ```
 POST /api/v1/messages
-{ "type": "SMS", "provider": "TWILIO", "to": "+910000000001", "body": "Hello" }
+{ "type": "SMS", "provider": "TWILIO_SMS", "to": "+910000000001", "body": "Hello" }
 ```
 
 1. `MessageController` checks the request: every field is required, `to` must be E.164, `body`

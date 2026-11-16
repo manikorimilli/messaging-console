@@ -154,7 +154,7 @@ function simulateProvider(providerId, to) {
   if (to.endsWith('999')) {
     return { status: 'FAILED', code: 'PROVIDER_TIMEOUT', detail: 'Provider did not respond within 10 seconds' };
   }
-  if (providerId === 'TWILIO') return { status: 'ACCEPTED', providerMessageId: `SM${randomHex(32)}`, providerStatus: 'queued' };
+  if (providerId.startsWith('TWILIO')) return { status: 'ACCEPTED', providerMessageId: `SM${randomHex(32)}`, providerStatus: 'queued' };
   if (providerId === 'VONAGE') return { status: 'ACCEPTED', providerMessageId: randomHex(16).toUpperCase(), providerStatus: '0' };
   return { status: 'ACCEPTED', providerMessageId: randomHex(24), providerStatus: 'accepted' };
 }
