@@ -20,6 +20,12 @@ download() { # url file
   fi
 }
 
+# Use the home folder if this folder can't hold the app (e.g. / or a system folder).
+if [ ! -w . ] || [ "$PWD" = / ]; then
+  cd "$HOME"
+  say "Using your home folder: $HOME"
+fi
+
 if [ -f ./init.sh ] && [ -f ./get.sh ]; then
   DIR=.
   say "Already inside the app folder, using it"
